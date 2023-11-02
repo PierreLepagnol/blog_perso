@@ -1,10 +1,7 @@
+// next.config.js
+const { withContentlayer } = require('next-contentlayer')
+
 /** @type {import('next').NextConfig} */
-const nextConfig = {
-    output: 'export',
-    reactStrictMode: true,
+const nextConfig = { reactStrictMode: true, swcMinify: true, output: 'export', basePath: '/blog_perso', }
 
-    // Add basePath
-    basePath: '/blog_perso',
-}
-
-module.exports = nextConfig
+module.exports = withContentlayer(nextConfig)
