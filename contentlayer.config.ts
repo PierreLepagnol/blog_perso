@@ -1,70 +1,89 @@
-import { defineDocumentType, makeSource } from "contentlayer/source-files"
-import rehypeAutolinkHeadings from "rehype-autolink-headings"
-import rehypePrettyCode from "rehype-pretty-code"
-import rehypeSlug from "rehype-slug"
-import remarkGfm from "remark-gfm"
+import { defineDocumentType, makeSource } from 'contentlayer/source-files';
 
-/** @type {import('contentlayer/source-files').ComputedFields} */
-const computedFields = {
-    slug: {
-        type: "string", resolve: (post: { _raw: { flattenedPath: any } }) => `/${post._raw.flattenedPath}`,
-    },
-    slugAsParams: {
-        type: "string", resolve: (post: { _raw: { flattenedPath: string } }) => post._raw.flattenedPath.split("/").slice(1).join("/"),
-    },
-}
+import rehypeAutolinkHeadings, { type Options as AutolinkOptions } from 'rehype-autolink-headings';
+import rehypePrettyCode, { type Options as PrettyCodeOptions } from 'rehype-pretty-code';
+import rehypeSlug from 'rehype-slug';
+import { s } from 'hastscript';
 
-
+// defining document type where we will defing our mdx document frontmatter structure
+// (all these fields will be passed to static json with types that can be imported and used by next app)
 export const Post = defineDocumentType(() => ({
-    name: "Post",
-    filePathPattern: `posts/**/*.mdx`,
-    contentType: "mdx",
+    name: 'Post',
+    filePathPattern: `**/*.mdx`,
+    contentType: 'mdx',
     fields: {
-        title: { type: "string", required: true },
-        description: { type: "string" },
-        date: { type: "date", required: true },
-        published: { type: "boolean", default: true },
-        authors: { type: "list", of: { type: "string" }, required: true },
+        title: { type: 'string', required: true },
+        date: { type: 'date', required: true },
+        excerpt: { type: 'string', required: true },
+        tags: { type: 'list', of: { type: 'string' }, required: true },
+        cover: { type: 'image', required: false },
     },
-    computedFields,
-}))
-
+    computedFields: {
+        url: { type: 'string', resolve: (post) => `posts/${post._raw.flattenedPath}` },
+        readTime: {
+            type: 'string',
+            resolve: (post) => {
+                const wordsPerMinute = 200;
+                const noOfWords = post.body.raw.split(/\s/g).length;
+                const minutes = noOfWords / wordsPerMinute;
+                const readTime = Math.ceil(minutes);
+                return readTime;
+            },
+        },
+    },
+}));
 
 export default makeSource({
-    contentDirPath: "content",
+    // folder in which we will store our content mdx files
+    contentDirPath: 'posts',
     documentTypes: [Post],
     mdx: {
-        remarkPlugins: [remarkGfm],
         rehypePlugins: [
+            /* Adds ids to headings */
             rehypeSlug,
             [
-                rehypePrettyCode,
-                {
-                    theme: "github-dark",
-                    onVisitLine(node) {
-                        // Prevent lines from collapsing in `display: grid` mode, and allow empty
-                        // lines to be copy/pasted
-                        if (node.children.length === 0) {
-                            node.children = [{ type: "text", value: " " }]
-                        }
-                    },
-                    onVisitHighlightedLine(node) {
-                        node.properties.className.push("line--highlighted")
-                    },
-                    onVisitHighlightedWord(node) {
-                        node.properties.className = ["word--highlighted"]
-                    },
-                },
-            ],
-            [
+                /* Adds auto-linking button after h1, h2, h3 headings */
                 rehypeAutolinkHeadings,
                 {
-                    properties: {
-                        className: ["subheading-anchor"],
-                        ariaLabel: "Link to section",
+                    behavior: 'append',
+                    test: ['h2', 'h3'],
+                    properties: { class: 'heading-link' },
+                    content: s(
+                        'svg',
+                        {
+                            xmlns: 'http://www.w3.org/2000/svg',
+                            viewBox: '0 0 24 24',
+                            width: '24',
+                            height: '24',
+                            fill: 'none',
+                            stroke: 'currentColor',
+                            'stroke-width': '2',
+                            'stroke-linecap': 'round',
+                            'stroke-linejoin': 'round',
+                            'aria-label': 'Anchor link',
+                        },
+                        [
+                            s('line', { x1: '4', y1: '9', x2: '20', y2: '9' }),
+                            s('line', { x1: '4', y1: '15', x2: '20', y2: '15' }),
+                            s('line', { x1: '10', y1: '3', x2: '8', y2: '21' }),
+                            s('line', { x1: '16', y1: '3', x2: '14', y2: '21' }),
+                        ],
+                    ),
+                } satisfies Partial<AutolinkOptions>,
+            ],
+            [
+                /**
+                 * Enhances code blocks with syntax highlighting, line numbers,
+                 * titles, and allows highlighting specific lines and words
+                 */
+                rehypePrettyCode,
+                {
+                    theme: {
+                        // light: 'github-light',
+                        dark: 'github-dark',
                     },
-                },
+                } satisfies Partial<PrettyCodeOptions>,
             ],
         ],
     },
-})
+});
