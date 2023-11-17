@@ -3,8 +3,9 @@ const { withContentlayer } = require('next-contentlayer')
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-    basePath: '/blog_perso',
-    reactStrictMode: true, swcMinify: true, output: 'export',
+    reactStrictMode: true,
+    swcMinify: true,
+    output: 'export',
     images: {
         loader: "custom",
         imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
