@@ -46,6 +46,11 @@ export function generateMetadata({ params: { slug } }: IProps): Metadata {
 const PostLayout = ({ params }: { params: { slug: string } }) => {
   const post = allPosts.find((post) => post._raw.flattenedPath === params.slug)
 
+  if (!post) {
+    return <div>Aucun POST</div> // or return <SomeComponent /> to render a specific component
+  }
+
+
   const Content = getMDXComponent(post.body.code)
 
   return (
@@ -61,3 +66,4 @@ const PostLayout = ({ params }: { params: { slug: string } }) => {
   )
 }
 export default PostLayout
+
