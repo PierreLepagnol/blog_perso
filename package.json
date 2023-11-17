@@ -6,15 +6,22 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "export": "next build && next export && next-image-export-optimizer"
   },
   "dependencies": {
+    "@fortawesome/fontawesome-svg-core": "^6.4.2",
+    "@fortawesome/free-brands-svg-icons": "^6.4.2",
+    "@fortawesome/free-solid-svg-icons": "^6.4.2",
+    "@fortawesome/react-fontawesome": "^0.2.0",
     "@t3-oss/env-nextjs": "^0.7.1",
     "clsx": "^2.0.0",
     "contentlayer": "^0.3.4",
     "date-fns": "^2.30.0",
+    "hastscript": "^8.0.0",
     "next": "14.0.0",
     "next-contentlayer": "^0.3.4",
+    "next-image-export-optimizer": "^1.10.0",
     "react": "^18",
     "react-dom": "^18",
     "rehype-autolink-headings": "^7.0.0",

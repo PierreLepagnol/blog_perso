@@ -1,30 +1,63 @@
-// app/posts/[slug]/page.tsx
 import { format, parseISO } from 'date-fns'
 import { allPosts } from 'contentlayer/generated'
-import { Mdx } from '@/components/mdx_components'
+import { getMDXComponent } from 'next-contentlayer/hooks'
+import { Metadata } from 'next';
 
-export const generateStaticParams = async () => allPosts.map((post) => ({ slug: post.slugAsParams }))
-
-export const generateMetadata = ({ params }: { params: { slug: string } }) => {
-    const post = allPosts.find((post) => post.slugAsParams === params.slug)
-    if (!post) throw new Error(`Post not found for slug: ${params.slug}`)
-    return { title: post.title }
+interface IProps {
+  params: { slug: string };
 }
 
+export const generateStaticParams = async () => allPosts.map((post) => ({ slug: post._raw.flattenedPath }))
+
+export function generateMetadata({ params: { slug } }: IProps): Metadata {
+  const post = allPosts.find((post) => post._raw.flattenedPath === slug);
+
+  if (!post) {
+    return {};
+  }
+
+  const { excerpt, title, date } = post;
+
+  const description = excerpt;
+
+  const ogImage = {
+    url: `${process.env.HOST}/blog/${slug}/og.png`,
+  };
+
+  return {
+    title,
+    description,
+    openGraph: {
+      type: 'article',
+      url: `${process.env.HOST}/blog/${slug}`,
+      title,
+      description,
+      publishedTime: date,
+      images: [ogImage],
+    },
+    twitter: {
+      title,
+      description,
+      images: ogImage,
+      card: 'summary_large_image',
+    },
+  };
+}
 const PostLayout = ({ params }: { params: { slug: string } }) => {
-    const post = allPosts.find((post) => post.slugAsParams === params.slug)
-    if (!post) throw new Error(`Post not found for slug: ${params.slug}`)
-    return (
-        <article className="mx-auto max-w-xl py-8">
-            <div className="mb-8 text-center">
-                <time dateTime={post.date} className="mb-1 text-xs text-gray-600">
-                    {format(parseISO(post.date), 'LLLL d, yyyy')}
-                </time>
-                <h1 className="text-3xl font-bold">{post.title}</h1>
-            </div>
-            <Mdx code={post.body.code} />
-        </article>
-    )
-}
+  const post = allPosts.find((post) => post._raw.flattenedPath === params.slug)
 
+  const Content = getMDXComponent(post.body.code)
+
+  return (
+    <article className="py-8 mx-auto max-w-xl">
+      <div className="mb-8 text-center">
+        <time dateTime={post.date} className="mb-1 text-xs text-gray-600">
+          {format(parseISO(post.date), 'LLLL d, yyyy')}
+        </time>
+        <h1>{post.title}</h1>
+      </div>
+      <Content />
+    </article>
+  )
+}
 export default PostLayout
