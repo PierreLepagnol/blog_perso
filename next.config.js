@@ -3,6 +3,7 @@ const { withContentlayer } = require('next-contentlayer')
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+    basePath: '/blog_perso',
     reactStrictMode: true, swcMinify: true, output: 'export',
     images: {
         loader: "custom",

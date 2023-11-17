@@ -7,7 +7,9 @@ interface IProps {
   params: { slug: string };
 }
 
-export const generateStaticParams = async () => allPosts.map((post) => ({ slug: post._raw.flattenedPath }))
+export async function generateStaticParams() {
+  return allPosts.map((post) => ({ slug: post._raw.flattenedPath }))
+}
 
 export function generateMetadata({ params: { slug } }: IProps): Metadata {
   const post = allPosts.find((post) => post._raw.flattenedPath === slug);
@@ -44,7 +46,8 @@ export function generateMetadata({ params: { slug } }: IProps): Metadata {
   };
 }
 const PostLayout = ({ params }: { params: { slug: string } }) => {
-  const post = allPosts.find((post) => post._raw.flattenedPath === params.slug)
+  const { slug } = params
+  const post = allPosts.find((post) => post._raw.flattenedPath === slug)
 
   if (!post) {
     return <div>Aucun POST</div> // or return <SomeComponent /> to render a specific component
