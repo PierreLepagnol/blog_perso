@@ -3,7 +3,7 @@ import ExportedImage from "next-image-export-optimizer";
 import ProfilePic from "public/images/PierreLepagnol.jpg";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faGithub, faLinkedinIn, faXTwitter } from '@fortawesome/free-brands-svg-icons';
-import { faMail } from '@fortawesome/free-solid-svg-icons';
+import { faEnvelope } from '@fortawesome/free-solid-svg-icons';
 import Link from "next/link";
 
 const AboutPage = () => {
@@ -29,12 +29,17 @@ const AboutPage = () => {
                     <Link href="https://twitter.com/LepagnolPierre" className="inline-flex justify-center items-center">
                         <FontAwesomeIcon width={25} icon={faXTwitter} />
                     </Link>
-                    <Link href="https://twitter.com/LepagnolPierre" className="inline-flex justify-center items-center">
-                        <FontAwesomeIcon width={25} icon={faMail} />
+                    <Link href="#" className="inline-flex justify-center items-center">
+                        <span className="mr-2">
+                            <FontAwesomeIcon width={25} icon={faEnvelope} />
+                        </span>
+                        <span className="font-bold">pierre.lepagnol[at]lisn.upsaclay.fr</span>
                     </Link>
+
+
                 </div>
-            </div>
-        </div>
+            </div >
+        </div >
     );
 };
 
