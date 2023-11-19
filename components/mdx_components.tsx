@@ -5,6 +5,7 @@ import { useMDXComponent } from "next-contentlayer/hooks"
 import { cn } from "@/lib/utils"
 import { Callout } from "@/components/callout"
 import { MdxCard } from "@/components/mdx-card"
+import CodeHead from "@/components/code-head";
 
 type HeadingProps = {
     className?: string; // Use `string` if className should be a string
@@ -12,6 +13,7 @@ type HeadingProps = {
     [key: string]: any; // For the rest of the props
 };
 const components = {
+    CodeHead,
     h1: ({ className, ...props }: HeadingProps) => (
         <h1
             className={cn(
@@ -22,6 +24,7 @@ const components = {
         />
     ),
     h2: ({ className, ...props }: HeadingProps) => (
+
         <h2
             className={cn(
                 "mt-10 scroll-m-20 border-b pb-1 text-3xl font-semibold tracking-tight first:mt-0",
@@ -102,7 +105,7 @@ const components = {
         ...props
     }: React.ImgHTMLAttributes<HTMLImageElement>) => (
         // eslint-disable-next-line @next/next/no-img-element
-        <img className={cn("rounded-md border", className)} alt={alt} {...props} />
+        <img className={cn("rounded-md ", className)} alt={alt} {...props} />
     ),
     hr: ({ ...props }) => <hr className="my-4 md:my-8" {...props} />,
     table: ({ className, ...props }: React.HTMLAttributes<HTMLTableElement>) => (
@@ -137,7 +140,7 @@ const components = {
     pre: ({ className, ...props }: HeadingProps) => (
         <pre
             className={cn(
-                "mb-4 mt-6 overflow-x-auto rounded-lg border bg-black",
+                "mb-4 overflow-x-auto rounded-b-lg  bg-black",
                 className
             )}
             {...props}
@@ -146,7 +149,7 @@ const components = {
     code: ({ className, ...props }: HeadingProps) => (
         <code
             className={cn(
-                "relative rounded border px-[0.3rem] py-[0.2rem] font-mono text-sm",
+                "relative px-[0.3rem] py-[0.2rem] font-mono text-sm",
                 className
             )}
             {...props}
@@ -163,7 +166,7 @@ interface MdxProps {
 
 export function Mdx({ code }: MdxProps) {
     const Component = useMDXComponent(code)
-
+    console.log(Component)
     return (
         <div className="mdx">
             <Component components={components} />

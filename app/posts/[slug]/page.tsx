@@ -1,14 +1,14 @@
-import { format, parseISO } from 'date-fns'
-import { allPosts } from 'contentlayer/generated'
-import { getMDXComponent } from 'next-contentlayer/hooks'
-import { Metadata } from 'next';
+import { format, parseISO } from "date-fns";
+import { allPosts } from "contentlayer/generated";
+import { Metadata } from "next";
+import { Mdx } from "@/components/mdx_components";
 
 interface IProps {
   params: { slug: string };
 }
 
 export async function generateStaticParams() {
-  return allPosts.map((post) => ({ slug: post._raw.flattenedPath }))
+  return allPosts.map((post) => ({ slug: post._raw.flattenedPath }));
 }
 
 export function generateMetadata({ params: { slug } }: IProps): Metadata {
@@ -30,7 +30,7 @@ export function generateMetadata({ params: { slug } }: IProps): Metadata {
     title,
     description,
     openGraph: {
-      type: 'article',
+      type: "article",
       url: `${process.env.HOST}/blog/${slug}`,
       title,
       description,
@@ -41,32 +41,30 @@ export function generateMetadata({ params: { slug } }: IProps): Metadata {
       title,
       description,
       images: ogImage,
-      card: 'summary_large_image',
+      card: "summary_large_image",
     },
   };
 }
 const PostLayout = ({ params }: { params: { slug: string } }) => {
-  const { slug } = params
-  const post = allPosts.find((post) => post._raw.flattenedPath === slug)
+  const { slug } = params;
+  const post = allPosts.find((post) => post._raw.flattenedPath === slug);
 
   if (!post) {
-    return <div>Aucun POST</div> // or return <SomeComponent /> to render a specific component
+    return <div>Aucun POST</div>; // or return <SomeComponent /> to render a specific component
   }
 
-
-  const Content = getMDXComponent(post.body.code)
+  // const Content =
 
   return (
     <article className="py-8 mx-auto max-w-xl">
       <div className="mb-8 text-center">
         <time dateTime={post.date} className="mb-1 text-xs text-gray-600">
-          {format(parseISO(post.date), 'LLLL d, yyyy')}
+          {format(parseISO(post.date), "LLLL d, yyyy")}
         </time>
         <h1>{post.title}</h1>
       </div>
-      <Content />
+      {Mdx(post.body)}
     </article>
-  )
-}
-export default PostLayout
-
+  );
+};
+export default PostLayout;

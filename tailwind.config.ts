@@ -11,6 +11,15 @@ const config: Config = {
   ],
   theme: {
     extend: {
+      colors: {
+        'editor-border': '#334155',
+        'editor-bg': '#24292e',
+        'editor-red': '#ff5f57',
+        'editor-yellow':'#febc2e',
+        'editor-green':'#28c840'
+      },
+      fontFamily: {'mono': ['monospace']
+      },
       backgroundImage: {
         'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
         'gradient-conic':

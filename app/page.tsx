@@ -38,7 +38,7 @@ const Home = () => {
           )}
           {mail_links.map(({adress,image, style,width,height})=>
           <Link href="#" key={adress} className="inline-flex flex-col gap-2 justify-center items-center">
-              <ExportedImage className={style} width={width} height={height} src={image} alt="Pierre LEPAGNOL" unoptimized />
+              <ExportedImage className={style} width={width} height={height} src={image} alt="Pierre LEPAGNOL" />
             <span className="font-bold">{adress}</span>
           </Link>)}
         </div>
