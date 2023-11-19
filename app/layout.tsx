@@ -1,15 +1,17 @@
-import '../styles/globals.css'
 
-import { Header } from '../components/Header'
+import { Header } from '@/components/Header'
 import NavBar from '@/components/Navbar'
+import type { Metadata } from 'next'
+import './globals.css'
+
+export const metadata: Metadata = {
+  title: 'Pierre LEPAGNOL',
+  description: 'Mon Super Blog Perso',
+}
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html>
-      <head>
-        <title>Pierre LEPAGNOL</title>
-        <link rel="icon" type="image/x-icon" href="/favicon.png" />
-      </head>
       <body>
         <Header />
         <NavBar />
