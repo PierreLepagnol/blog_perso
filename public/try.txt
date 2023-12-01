@@ -1,8 +1,8 @@
 ---
-title: Reasoning Capabilities in small models
+title: Reasoning Capabilities in Small Models
 date: 2023-07-20
-excerpt: This is my first post
-tags: [next.js, blog, static blog, tailwind, mdx, contentlayer]
+excerpt: .
+tags: [reasoning]
 ---
 
 
@@ -36,8 +36,6 @@ The two papers "Orca: Progressive Learning from Complex Explanation Traces of GP
 - **Evaluation**: Both models are evaluated against rigorous benchmarks, but Orca 2 specifically focuses on zero-shot evaluation across diverse benchmarks.
 
 In summary, while both Orca and Orca 2 share the overarching goal of improving smaller language models, they differ in their specific methodologies, training data, and evaluation protocols. Orca focuses on learning through imitation of large models, whereas Orca 2 emphasizes teaching varied reasoning strategies to small models.
-
-
 
 
 

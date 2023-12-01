@@ -1,0 +1,87 @@
+---
+title: Reasoning Capabilities in Small Models
+date: 2023-07-20
+excerpt: On parle 
+tags: [reasoning, small models, chain of thought, chatgpt]
+---
+## Quel est le problème ?
+
+Objectif : On veut "comprendre" un énoncé complexe et répondre à une question à propos de cet énoncé.
+
+- Résoudre un problème de math.
+- Répondre à des questions médicale
+- Répondre à des questions juridique
+- Répondre à des questions de logique
+
+**Donner un exemple pour chaque problème pour avoir une idée de la diversité et difficulté des problèmes rencontrés
+exemples issus de GSM8K, AGIEval etc.**
+
+Souvent besoin de formuler des raisonement pour répondre correctement =>
+
+Les Large Language Models "savent" produire des phrases qui s'apparentent à des raisonnements via les méchanismes de Chain-of-Thought (CoT) & Tree-of-Thought (ToT) prompting.
+Mais les SLM (Small Language Models) non.
+
+En revanche, il y a plusieurs problèmes avec les LLM :
+
+- Cher à entrainer + Cher à utiliser =>Dernière des api payantes ou politique de données non privacy-friendly + Cout Energetique elevé.
+- Demande beaucoup de ressouces pour être utilisés => Pas utilisable sur des appareils mobiles, ordinateurs personnels, petit serveurs.
+- Pas auditables => On ne sait pas pourquoi ils répondent ce qu'ils répondent.
+
+On veut donc utiliser des SLM pour répondre à des questions de raisonnement.
+==> Il faut les entrainer à raisonner.
+
+## Comment sait-on si un modèle sait raisonner ?
+
+## Quels benchmarks/datasets d'évaluation ?
+
+- **AGIEval** : AGIEval est une collection de divers ensembles de tests standardisés, y compris des tests généraux d'admission à l'université comme le GRE, le GMAT et le SAT ; des examens axés sur le droit comme le LSAT et les évaluations de qualification des avocats ; des concours de mathématiques ; et des tests nationaux. comme le LSAT et les évaluations de qualification des avocats, des concours de mathématiques et des examens nationaux de la fonction publique . les examens de la fonction publique nationale .
+- **DROP**(fr : Raisonnement discret sur des paragraphes) : est un test de compréhension de la lecture créé par des adversaires, qui demande aux modèles de naviguer dans des références et d'exécuter des opérations discrètes telles que l'addition ou la suppression de mots. et d'exécuter des opérations discrètes telles que l'addition ou le tri. InstructEval et du OpenLLM Leaderboard.
+- **CRASS** : L'ensemble de données CRASS évalue les capacités de raisonnement contrefactuel des LLM.
+- **RACE** : L'ensemble de données RACE est une collection de questions de compréhension de la lecture de compréhension de la lecture dérivées d'examens d'anglais donnés à des étudiants chinois âgés de 12 à 18 ans. ans.
+- **Big-Bench Hard** (BBH) : BBH est un sous-ensemble des 23 tâches les plus difficiles de BIG-Bench en mettant l'accent sur les tâches difficiles telles que celles qui nécessitent un raisonnement en plusieurs étapes.
+- **GSM8K** : il s'agit d'une collection de problèmes de mots qui testent la capacité à effectuer un raisonnement mathématique en plusieurs étapes . raisonnement mathématique en plusieurs étapes . 
+
+
+## Quelles métriques d'évaluation ?
+
+1. Mesures quantitatives :
+    - Tasks Specific accuracy pour les questions à choix multiples.
+    - Exact match pour les questions à compléter (fill-in-the-blank questions).
+
+2. Mesures qualitative : 
+    - Une évaluation plus approfondie impliquant des évaluateurs humains pour juger les réponses du modèle:
+        1. compréhension sémantique
+        2. Utilisation des connaissances
+        3. Qualité du raisonnement.
+
+## Quelles strategies et données d'entrainenement ?
+
+### Orca: Progressive Learning from Complex Explanation Traces of GPT-4
+
+1. Objectif
+2. Methodologie
+3. Détails Techniques
+4. Protocole d'Evaluation
+
+### Orca 2: Teaching Small Language Models How to Reason
+
+1. Objectif
+2. Methodologie
+3. Détails Techniques
+4. Protocole d'Evaluation
+
+## Quelles futures étapes pour la recherche l'IA ?
+
+Prospective sur la recherche ... Difficile à dire.
+- Mise en valeur de ma recherche : utilisation de petit modèles pour résoudre les problèmes de classification ? 
+
+
+## Comment integrer ces SLM faisant du raisonement à un business ?
+
+Ici je ne sais pas trop quoi dire, mais je pense que c'est une question importante à se poser.
+- Mise en valeur de l'expertise de SCIAM .
+
+## Question interessante mais pas abordée ici :
+
+1. C'est quoi le Chain-of-Thought (CoT) & Tree-of-Thought (ToT) prompting ?
+2. C'est quoi les Large Language Models (LLM) ?
