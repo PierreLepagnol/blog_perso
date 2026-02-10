@@ -1,8 +1,13 @@
-import { withContentCollections } from "@content-collections/next";
+import { createContentCollectionPlugin } from "@content-collections/next";
+
+const withContentCollections = createContentCollectionPlugin({
+  configPath: "content-collections.config.ts",
+});
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   output: "export",
+  serverExternalPackages: ["@content-collections/core", "esbuild"],
   images: {
     loader: "custom",
     imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
