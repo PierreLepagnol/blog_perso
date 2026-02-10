@@ -28,7 +28,7 @@
         "./*"
       ],
       "content-collections": [
-        "./.content-collections/generated"
+        "./.content-collections/generated/index"
       ]
     }
   },
