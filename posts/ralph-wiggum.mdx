@@ -1,0 +1,87 @@
+---
+title: Ralph Wiggum
+date: 2023-07-20
+excerpt: une bash loop pour remplacer le software engineering ? 
+tags: [next.js, blog, static blog, tailwind, mdx, contentlayer]
+---
+
+Les software engineers vont être remplacés ! Oui, même les seniors — et non, ce n’est pas une blague. Selon vous, quel est le point commun entre : 
+
+- Un contrat logiciel de 50 000 $ livré pour 297 $ en coûts d’API. 
+- 6 repos complets générés en une nuit lors d’un hackathon YC. 
+- Un langage de programmation entier créé en trois mois. 
+
+![Ralph Wiggum](/posts/ralph-wiggum/ralph.jpeg)
+
+
+Une boucle bash simple, nommée d’après un personnage des Simpsons, Ralph Wiggum, qui est maintenant officiellement supportée par Anthropic. 
+
+⚙️ Ralph Wiggum : l’idée stupidement utile 
+
+Popularisée par Geoffrey Huntley dans le courant de l’été 2025, l’idée de “Ralph” est simple : utiliser un agent IA dans une boucle, en donnant du feedback pour que l’agent itère jusqu’à atteindre les critères définis par l’utilisateur. 
+
+Concrètement : 
+
+    Une boucle bash qui envoie le même prompt à Claude Code de manière répétée 
+
+    Un “stop hook” qui intercepte les fins de workflow de l’agent IA (comme Claude Code) et relance la boucle 
+
+    Des critères de fin explicites et bien définis 
+
+    Optionnel : une limite d’itérations pour éviter les boucles infinies 
+
+Le feedback (fichiers PRD, commits git, résultats de tests) est accessible par l’agent pour améliorer son travail et le code produit. 
+
+Quand et comment utiliser Ralph ? 
+
+Initialement, le code de Ralph était : while :; do cat PROMPT.md | claude-code; done. Il est maintenant disponible officiellement dans le repository d’Anthropic : 
+
+https://github.com/anthropics/claude-code/tree/main/plugins/ralph-wiggum 
+
+Mais Ralph n’est pas une solution magique. Il est bon pour : 
+
+    Les tâches bien définies avec des critères de succès clairs 
+
+    Le développement piloté par les tests (TDD) et nécessitant itération/raffinement 
+
+    Les projets “greenfield” où vous pouvez vous en détacher 
+
+    Les tâches avec vérification automatique (tests, linters) 
+
+    Les itérations overnight pendant que vous dormez 
+
+Il est moins bon pour : 
+
+    Les tâches nécessitant un jugement humain (design, UX) 
+
+    Les opérations uniques (faire un one-shot) 
+
+    Le debugging de code en production 
+
+    Et évidemment, les tâches avec des critères de succès flous 
+
+ 
+
+Bonnes pratiques et patterns avancés 
+
+Nous entrons dans une ère où les modèles et les agents peuvent produire du code incroyable si nous leur donnons le bon “harness”. 
+
+Cette méthode “Ralph” nous pousse à : 
+
+    TOUT documenter (outils et documents utiles, exigences claires, réussites et échecs de l’agent pour l’amélioration des itérations) 
+
+    Rédiger des exigences spécifiques et mesurables 
+
+    Diviser les tâches complexes en étapes plus petites 
+
+    Définir des critères de complétion clairs 
+
+    Utiliser des checkpoints réguliers (par défaut, toutes les 5 itérations) 
+
+    Suivre la progression de l’agent 
+
+    Contrôler les versions des prompts, etc. 
+
+💬 Et vous, prêt à vous faire remplacer ? 
+
+#AI #SoftwareDevelopment #AIAgents #Automation #ClaudeCode #CostEfficiency #DevOps
