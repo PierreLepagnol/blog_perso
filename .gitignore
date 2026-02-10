@@ -40,3 +40,8 @@ next-env.d.ts
 
 .env
 pnpm-*.yaml
+bun.lock
+
+# image optimizer output
+public/next-image-export-optimizer-hashes.json
+public/nextImageExportOptimizer/
