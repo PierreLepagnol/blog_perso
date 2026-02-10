@@ -1,12 +1,36 @@
-import Link from 'next/link';
+"use client";
+
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 
 const NavBar = () => {
-    return (
-        <nav className="gap-5 flex justify-center p-3">
-            <Link href="/" className='mb-8 text-xl font-bold text-center'>About Me</Link>
-            <Link href="/posts" className='mb-8 text-xl font-bold text-center'>Articles</Link>
-        </nav>
-    );
+  const pathname = usePathname();
+  const links = [
+    { href: "/", label: "About" },
+    { href: "/posts", label: "Articles" },
+  ];
+
+  return (
+    <nav className="border-b border-ink flex justify-center">
+      {links.map(({ href, label }, i) => {
+        const isActive = pathname === href || (href !== "/" && pathname.startsWith(href));
+        return (
+          <Link
+            key={href}
+            href={href}
+            className={`
+              px-8 py-3 font-sans text-xs uppercase tracking-[0.2em] font-semibold
+              transition-colors duration-200
+              ${i > 0 ? "border-l border-ink" : ""}
+              ${isActive ? "bg-ink text-newsprint" : "hover:bg-neutral-100"}
+            `}
+          >
+            {label}
+          </Link>
+        );
+      })}
+    </nav>
+  );
 };
 
 export default NavBar;

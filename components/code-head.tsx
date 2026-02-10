@@ -1,74 +1,40 @@
-import React from 'react';
-import { IoLogoHtml5, IoLogoCss3, IoLogoSass, IoLogoJavascript, IoLogoReact, IoLogoMarkdown, IoTerminalOutline, IoLogoPython, IoLogoLinkedin } from 'react-icons/io5';
+import React from "react";
+import {
+  IoLogoHtml5, IoLogoCss3, IoLogoSass, IoLogoJavascript,
+  IoLogoReact, IoLogoMarkdown, IoTerminalOutline, IoLogoPython,
+} from "react-icons/io5";
 
+const LANGS: Record<string, { name: string; icon: React.ReactNode }> = {
+  python: { name: "Python", icon: <IoLogoPython /> },
+  html: { name: "HTML", icon: <IoLogoHtml5 /> },
+  css: { name: "CSS", icon: <IoLogoCss3 /> },
+  scss: { name: "Sass", icon: <IoLogoSass /> },
+  js: { name: "JavaScript", icon: <IoLogoJavascript /> },
+  jsx: { name: "JSX", icon: <IoLogoReact /> },
+  md: { name: "Markdown", icon: <IoLogoMarkdown /> },
+  mdx: { name: "MDX", icon: <IoLogoMarkdown /> },
+  console: { name: "console", icon: <IoTerminalOutline /> },
+};
 
-type CodeHeadProps = {
-  name: string;
-  lang: string;
-}
-
-export default function CodeHead({ name, lang }: CodeHeadProps) {
-  const outputLanguageString = (value: string) => {
-    switch (value) {
-      case "python": {
-        return { name: "Python", icon: <IoLogoPython /> };
-      }
-      case "html": {
-        return { name: "HTML", icon: <IoLogoHtml5 /> };
-      }
-      case "css": {
-        return { name: "CSS", icon: <IoLogoCss3 /> };
-      }
-      case "scss": {
-        return { name: "Sass", icon: <IoLogoSass /> };
-      }
-      case "js": {
-        return { name: "JavaScript", icon: <IoLogoJavascript /> };
-      }
-      case "jsx": {
-        return { name: "JSX", icon: <IoLogoReact /> };
-      }
-      case "md": {
-        return { name: "Markdown", icon: <IoLogoMarkdown /> };
-      }
-      case "mdx": {
-        return { name: "MDX", icon: <IoLogoMarkdown /> };
-      }
-      case "console": {
-        return { name: "console", icon: <IoTerminalOutline /> };
-      }
-      default:
-        break;
-    }
-  };
-  const langData = outputLanguageString(lang);
-  const iconColor = getIconColor(lang); // Function to determine icon color based on language
+export default function CodeHead({ name, lang }: { name: string; lang: string }) {
+  const langData = LANGS[lang];
 
   return (
-    <div className="p-4 font-mono text-sm mt-8 leading-4 text-white/60 bg-editor-bg rounded-t-lg flex items-center w-full">
-      <div className="hidden sm:flex items-center mr-3">
-        <span className="w-2.5 h-2.5 bg-editor-red rounded-full mr-1.5 block"></span>
-        <span className="w-2.5 h-2.5 bg-editor-yellow rounded-full mr-1.5 block"></span>
-        <span className="w-2.5 h-2.5 bg-editor-green rounded-full mr-1.5 block"></span>
+    <div className="p-3 font-mono text-xs mt-8 text-neutral-400 bg-ink border border-ink border-b-0 flex items-center w-full">
+      <div className="hidden sm:flex items-center mr-3 gap-1.5">
+        <span className="w-2.5 h-2.5 bg-editor-red block" />
+        <span className="w-2.5 h-2.5 bg-editor-yellow block" />
+        <span className="w-2.5 h-2.5 bg-editor-green block" />
       </div>
-
-      <div className="flex justify-between flex-grow">
+      <div className="flex justify-between grow">
         {name && <span>{name}</span>}
-        <div className="flex items-center">
-          <div className={`text-${iconColor} mr-1`}>
-            {langData?.icon}
+        {langData && (
+          <div className="flex items-center gap-1 text-neutral-500">
+            {langData.icon}
+            <span className="uppercase tracking-widest text-[10px]">{langData.name}</span>
           </div>
-          <span>{langData?.name}</span>
-        </div>
+        )}
       </div>
     </div>
   );
-}
-
-function getIconColor(lang: string) {
-  switch (lang) {
-    case "html": return "red-600";
-    case "css": return "blue-600";
-    default: return "gray-500";
-  }
 }

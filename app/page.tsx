@@ -1,128 +1,87 @@
 import ExportedImage from "next-image-export-optimizer";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import {
-  faGithub,
-  faLinkedinIn,
-  faXTwitter,
-} from "@fortawesome/free-brands-svg-icons";
-import { faEnvelope } from "@fortawesome/free-solid-svg-icons";
 import Link from "next/link";
 
 const Home = () => {
-  const network_links = [
-    {
-      url: "https://github.com/PierreLepagnol",
-      icon: faGithub,
-      label: "GitHub",
-    },
-    {
-      url: "https://www.linkedin.com/in/pierre-lepagnol",
-      icon: faLinkedinIn,
-      label: "LinkedIn",
-    },
-    {
-      url: "https://twitter.com/LepagnolPierre",
-      icon: faXTwitter,
-      label: "Twitter",
-    },
-  ];
-  const mail_links = [
-    {
-      adress: "pierre.lepagnol[at]lisn.upsaclay.fr",
-      image: "logoLISN.svg",
-      style: "mr-2",
-      width: 60,
-      height: 60,
-      alt: "LISN Logo",
-    },
-    {
-      adress: "pierre.lepagnol[at]sciam.fr",
-      image: "logoSciam.png",
-      style: "mr-2 invert",
-      width: 45,
-      height: 45,
-      alt: "SCIAM Logo",
-    },
-  ];
-
   return (
-    <div className="flex flex-col lg:flex-row items-center lg:items-start gap-8 lg:gap-12 max-w-6xl mx-auto">
-      <div className="w-full lg:w-1/2 flex justify-center">
-        <div className="relative w-full max-w-md aspect-square rounded-2xl overflow-hidden shadow-xl">
+    <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12">
+      {/* Portrait */}
+      <div className="lg:col-span-5">
+        <div className="border border-ink overflow-hidden">
           <ExportedImage
-            width={500}
-            height={500}
+            width={600}
+            height={750}
             src="PierreLepagnol.jpg"
-            alt="Pierre LEPAGNOL"
-            className="object-cover"
+            alt="Pierre Lepagnol"
+            className="grayscale hover:grayscale-0 transition-all duration-500 object-cover w-full"
           />
         </div>
       </div>
 
-      <div className="w-full lg:w-1/2 flex flex-col justify-center space-y-8">
-        <div className="space-y-4">
-          <h1 className="text-4xl md:text-5xl font-bold text-center lg:text-left">
-            Pierre Lepagnol
-          </h1>
-          <p className="text-lg md:text-xl text-gray-700 dark:text-gray-300 text-center lg:text-left leading-relaxed">
-            PhD Student in Computer Science at LISN/Paris-Saclay University &
-            Data Scientist Consultant at SCIAM
-          </p>
-        </div>
+      {/* Bio */}
+      <div className="lg:col-span-7 flex flex-col justify-center">
+        <h2 className="font-serif text-3xl lg:text-4xl font-black tracking-tight leading-[0.95] mb-6">
+          PhD Student in Computer Science &amp; Data Scientist
+        </h2>
 
-        <blockquote className="text-center lg:text-left italic text-gray-600 dark:text-gray-400 border-l-4 border-gray-300 dark:border-gray-600 pl-4 py-2">
-          Ton dernier combat sera le mien
+        <p className="font-body text-neutral-700 leading-relaxed mb-6">
+          Currently pursuing a PhD at LISN/Paris-Saclay University while consulting as a Data Scientist at SCIAM. My research sits at the intersection of machine learning and natural language processing.
+        </p>
+
+        <blockquote className="border-l-4 border-ink pl-4 mb-8">
+          <p className="font-serif italic text-lg mb-0">
+            &ldquo;Ton dernier combat sera le mien&rdquo;
+          </p>
         </blockquote>
 
-        <div className="space-y-6">
-          <div className="flex justify-center lg:justify-start gap-6">
-            {network_links.map(({ url, icon, label }) => (
-              <Link
-                key={url}
-                href={url}
-                className="group"
-                aria-label={label}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                <div className="w-12 h-12 flex items-center justify-center rounded-full bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 transition-all transform group-hover:scale-110">
-                  <FontAwesomeIcon
-                    className="text-gray-700 dark:text-gray-300"
-                    width={20}
-                    icon={icon}
-                  />
-                </div>
-              </Link>
-            ))}
-          </div>
-
-          <div className="space-y-4 pt-4 border-t border-gray-200 dark:border-gray-700">
-            {mail_links.map(({ adress, image, style, width, height, alt }) => (
-              <div
-                key={adress}
-                className="flex items-center gap-4 p-4 rounded-lg bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
-              >
+        {/* Affiliations & Socials — masthead style */}
+        <div className="border-t-2 border-b border-ink pt-4 pb-4 mt-2">
+          <p className="font-sans text-[10px] uppercase tracking-[0.2em] text-neutral-500 mb-3">
+            Affiliations
+          </p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-0 divide-y sm:divide-y-0 sm:divide-x divide-ink">
+            {[
+              { name: "LISN / Paris-Saclay", role: "PhD Student", email: "pierre.lepagnol[at]lisn.upsaclay.fr", logo: "logoLISN.svg", w: 28, h: 28 },
+              { name: "SCIAM", role: "Data Scientist", email: "pierre.lepagnol[at]sciam.fr", logo: "logoSciam.png", w: 24, h: 24, cls: "invert" },
+            ].map(({ name, role, email, logo, w, h, cls }, i) => (
+              <div key={name} className={`flex items-start gap-3 py-2 sm:py-0 ${i > 0 ? "sm:pl-5" : ""}`}>
                 <ExportedImage
-                  className={style}
-                  width={width}
-                  height={height}
-                  src={image}
-                  alt={alt}
+                  className={`mt-0.5 shrink-0 ${cls || ""}`}
+                  width={w}
+                  height={h}
+                  src={logo}
+                  alt={name}
                   unoptimized
                 />
-                <div className="flex items-center gap-2">
-                  <FontAwesomeIcon
-                    className="text-gray-600 dark:text-gray-400"
-                    width={16}
-                    icon={faEnvelope}
-                  />
-                  <span className="text-sm md:text-base font-medium text-gray-700 dark:text-gray-300">
-                    {adress}
-                  </span>
+                <div className="min-w-0">
+                  <p className="font-serif font-bold text-sm leading-tight mb-0">{role}</p>
+                  <p className="font-sans text-xs text-neutral-600 mb-0">{name}</p>
+                  <p className="font-mono text-[11px] text-neutral-500 mb-0 truncate">{email}</p>
                 </div>
               </div>
             ))}
           </div>
+        </div>
+
+        {/* Social links — inline editorial */}
+        <div className="flex items-center gap-1 mt-4 font-sans text-xs text-neutral-500">
+          <span className="uppercase tracking-[0.15em] mr-2">Find me on</span>
+          {[
+            { url: "https://github.com/PierreLepagnol", label: "GitHub" },
+            { url: "https://www.linkedin.com/in/pierre-lepagnol", label: "LinkedIn" },
+            { url: "https://twitter.com/LepagnolPierre", label: "Twitter" },
+          ].map(({ url, label }, i, arr) => (
+            <span key={url}>
+              <Link
+                href={url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-ink font-medium underline decoration-1 underline-offset-3 hover:decoration-editorial-red transition-colors"
+              >
+                {label}
+              </Link>
+              {i < arr.length - 1 && <span className="mx-1.5 text-neutral-400">/</span>}
+            </span>
+          ))}
         </div>
       </div>
     </div>
