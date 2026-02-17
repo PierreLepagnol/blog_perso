@@ -46,37 +46,35 @@ export default async function Page({
 
   return (
     <article className="max-w-2xl mx-auto">
-      {/* Header */}
-      <header className="mb-8">
-        <Link
-          href="/posts"
-          className="font-mono text-[10px] uppercase tracking-[0.2em] text-neutral-500 hover:text-ink mb-6 inline-block"
-        >
-          &larr; All Articles
-        </Link>
+      <Link
+        href="/#articles"
+        className="font-sans text-xs uppercase tracking-[0.2em] text-neutral-500 hover:text-ink mb-6 inline-block"
+      >
+        &larr; Back to Home
+      </Link>
 
-        <h1 className="font-serif text-3xl sm:text-4xl lg:text-5xl font-black tracking-tighter leading-[0.92] mb-4">
+      <header className="mb-10 border-b border-neutral-200 pb-6">
+        <h1 className="font-serif text-3xl sm:text-4xl font-extrabold tracking-tight leading-tight mb-4">
           {post.title}
         </h1>
 
-        <div className="flex flex-wrap gap-4 font-mono text-[10px] uppercase tracking-[0.15em] text-neutral-500 pb-4 border-b border-ink">
+        <div className="flex flex-wrap gap-2 font-sans text-xs uppercase tracking-[0.15em] text-neutral-500">
           <time dateTime={post.date}>
             {format(parseISO(post.date), "LLLL d, yyyy")}
           </time>
+          <span>&middot;</span>
           <span>{post.readTime} min read</span>
         </div>
       </header>
 
-      {/* Body */}
       <Mdx code={post.mdx} />
 
-      {/* End */}
-      <div className="border-t border-ink mt-12 pt-6">
+      <div className="border-t border-neutral-200 mt-12 pt-6">
         <Link
-          href="/posts"
-          className="font-sans text-xs uppercase tracking-[0.2em] font-semibold bg-ink text-newsprint px-5 py-2.5 border border-ink hover:bg-newsprint hover:text-ink transition-colors"
+          href="/#articles"
+          className="font-sans text-xs uppercase tracking-[0.2em] text-neutral-500 hover:text-ink"
         >
-          &larr; Back to Articles
+          Read more from home page &rarr;
         </Link>
       </div>
     </article>

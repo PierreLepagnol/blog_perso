@@ -53,6 +53,22 @@ const posts = defineCollection({
   },
 });
 
+const projects = defineCollection({
+  name: "projects",
+  directory: "data",
+  include: "projects.yml",
+  parser: "yaml",
+  schema: z.object({
+    projects: z.array(
+      z.object({
+        title: z.string(),
+        description: z.string(),
+        url: z.string().optional(),
+      }),
+    ),
+  }),
+});
+
 export default defineConfig({
-  collections: [posts],
+  collections: [posts, projects],
 });

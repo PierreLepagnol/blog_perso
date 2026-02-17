@@ -1,89 +1,245 @@
 import ExportedImage from "next-image-export-optimizer";
 import Link from "next/link";
+import { compareDesc, format, parseISO } from "date-fns";
+import { allPosts, allProjects } from "content-collections";
+import { IoAtOutline } from "react-icons/io5";
+import { FaGithub, FaLinkedinIn, FaXTwitter } from "react-icons/fa6";
+import type { ComponentType, ReactNode } from "react";
+
+const cx = (...classes: Array<string | undefined>) =>
+  classes.filter(Boolean).join(" ");
+
+type CardProps = {
+  children: ReactNode;
+  className?: string;
+  id?: string;
+};
+
+const Card = ({ children, className, id }: CardProps) => (
+  <article
+    id={id}
+    className={cx("border border-neutral-200 bg-white", className)}
+  >
+    {children}
+  </article>
+);
+
+type EyebrowProps = {
+  children: ReactNode;
+  className?: string;
+};
+
+const Eyebrow = ({ children, className }: EyebrowProps) => (
+  <p
+    className={cx(
+      "font-sans text-[11px] uppercase tracking-[0.18em] text-neutral-500",
+      className,
+    )}
+  >
+    {children}
+  </p>
+);
+
+type ProfileLinkProps = {
+  url: string;
+  label: string;
+  Icon: ComponentType<{ className?: string }>;
+};
+
+const ProfileLink = ({ url, label, Icon }: ProfileLinkProps) => (
+  <a
+    href={url}
+    target="_blank"
+    rel="noopener noreferrer"
+    aria-label={label}
+    title={label}
+    className="inline-flex h-9 w-9 items-center justify-center border border-neutral-300 text-neutral-700 hover:text-editorial-red hover:border-editorial-red transition-colors"
+  >
+    <Icon className="text-base" />
+  </a>
+);
 
 const Home = () => {
+  const posts = [...allPosts].sort((a, b) =>
+    compareDesc(new Date(a.date), new Date(b.date)),
+  );
+
+  const profiles = [
+    {
+      url: "https://github.com/PierreLepagnol",
+      label: "GitHub",
+      Icon: FaGithub,
+    },
+    {
+      url: "https://twitter.com/LepagnolPierre",
+      label: "X",
+      Icon: FaXTwitter,
+    },
+    {
+      url: "https://www.linkedin.com/in/pierre-lepagnol",
+      label: "LinkedIn",
+      Icon: FaLinkedinIn,
+    },
+  ];
+
+  const projects = allProjects[0]?.projects ?? [];
+
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12">
-      {/* Portrait */}
-      <div className="lg:col-span-5">
-        <div className="border border-ink overflow-hidden">
-          <ExportedImage
-            width={600}
-            height={750}
-            src="PierreLepagnol.jpg"
-            alt="Pierre Lepagnol"
-            className="grayscale hover:grayscale-0 transition-all duration-500 object-cover w-full"
-          />
-        </div>
-      </div>
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-10 md:gap-12 lg:gap-14 items-start">
+      <div className="space-y-10">
+        <section id="bio">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-5">
+            <Card
+              id="profile-photo"
+              className="md:row-span-3 bg-neutral-50/50 overflow-hidden"
+            >
+              <ExportedImage
+                width={600}
+                height={750}
+                src="PierreLepagnol.jpg"
+                alt="Pierre Lepagnol"
+                className="grayscale object-cover w-full h-full min-h-[280px]"
+              />
+            </Card>
 
-      {/* Bio */}
-      <div className="lg:col-span-7 flex flex-col justify-center">
-        <h2 className="font-serif text-3xl lg:text-4xl font-black tracking-tight leading-[0.95] mb-6">
-          PhD Student in Computer Science &amp; Data Scientist
-        </h2>
+            <Card id="bio-summary" className="p-5 md:p-6">
+              <p className="font-body text-neutral-700 leading-relaxed mb-4">
+                Currently pursuing a PhD at LISN/Paris-Saclay University while
+                consulting as a Data Scientist at SCIAM. My research sits at the
+                intersection of machine learning and natural language
+                processing.
+              </p>
+              <p className="font-body text-neutral-700 leading-relaxed mb-4">
+                I write about practical NLP, experimentation methods, and
+                lessons learned from research to production work.
+              </p>
+              <a
+                href="/cv.pdf"
+                download
+                className="inline-flex items-center border border-neutral-300 px-4 py-2 font-sans text-xs uppercase tracking-[0.15em] text-neutral-600 transition-colors hover:border-editorial-red hover:text-editorial-red"
+              >
+                Download CV (PDF)
+              </a>
+            </Card>
 
-        <p className="font-body text-neutral-700 leading-relaxed mb-6">
-          Currently pursuing a PhD at LISN/Paris-Saclay University while consulting as a Data Scientist at SCIAM. My research sits at the intersection of machine learning and natural language processing.
-        </p>
-
-        <blockquote className="border-l-4 border-ink pl-4 mb-8">
-          <p className="font-serif italic text-lg mb-0">
-            &ldquo;Ton dernier combat sera le mien&rdquo;
-          </p>
-        </blockquote>
-
-        {/* Affiliations & Socials — masthead style */}
-        <div className="border-t-2 border-b border-ink pt-4 pb-4 mt-2">
-          <p className="font-sans text-[10px] uppercase tracking-[0.2em] text-neutral-500 mb-3">
-            Affiliations
-          </p>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-0 divide-y sm:divide-y-0 sm:divide-x divide-ink">
-            {[
-              { name: "LISN / Paris-Saclay", role: "PhD Student", email: "pierre.lepagnol[at]lisn.upsaclay.fr", logo: "logoLISN.svg", w: 28, h: 28 },
-              { name: "SCIAM", role: "Data Scientist", email: "pierre.lepagnol[at]sciam.fr", logo: "logoSciam.png", w: 24, h: 24, cls: "invert" },
-            ].map(({ name, role, email, logo, w, h, cls }, i) => (
-              <div key={name} className={`flex items-start gap-3 py-2 sm:py-0 ${i > 0 ? "sm:pl-5" : ""}`}>
-                <ExportedImage
-                  className={`mt-0.5 shrink-0 ${cls || ""}`}
-                  width={w}
-                  height={h}
-                  src={logo}
-                  alt={name}
-                  unoptimized
-                />
-                <div className="min-w-0">
-                  <p className="font-serif font-bold text-sm leading-tight mb-0">{role}</p>
-                  <p className="font-sans text-xs text-neutral-600 mb-0">{name}</p>
-                  <p className="font-mono text-[11px] text-neutral-500 mb-0 truncate">{email}</p>
+            <Card id="current-roles" className="p-5 md:p-6 bg-neutral-50/60">
+              <Eyebrow className="mb-2">Current Roles</Eyebrow>
+              <div className="space-y-3 text-sm text-neutral-700">
+                <div className="flex items-center justify-between gap-3">
+                  <p className="mb-0">
+                    PhD Student, LISN / Paris-Saclay University
+                  </p>
+                  <ExportedImage
+                    width={72}
+                    height={24}
+                    src="logoLISN.svg"
+                    alt="LISN logo"
+                    className="h-5 w-auto shrink-0"
+                  />
+                </div>
+                <div className="flex items-center justify-between gap-3">
+                  <p className="mb-0">Data Scientist Consultant, SCIAM</p>
+                  <ExportedImage
+                    width={72}
+                    height={24}
+                    src="logoSciam.png"
+                    alt="SCIAM logo"
+                    className="h-5 w-auto shrink-0"
+                  />
                 </div>
               </div>
+            </Card>
+            <Card id="profiles" className="p-5 md:p-6">
+              <div className="flex items-center gap-2 mb-3 text-neutral-500">
+                <IoAtOutline aria-hidden className="text-sm" />
+                <Eyebrow className="mb-0 text-inherit">Profiles</Eyebrow>
+              </div>
+              <p className="text-neutral-700 text-sm mb-4">
+                Reach me for research collaborations, consulting opportunities,
+                or technical discussions.
+              </p>
+              <div className="flex items-center gap-3">
+                {profiles.map(({ url, label, Icon }) => (
+                  <ProfileLink key={url} url={url} label={label} Icon={Icon} />
+                ))}
+              </div>
+            </Card>
+          </div>
+        </section>
+      </div>
+
+      <section id="articles">
+        <Card id="projects" className="p-5 md:p-6 bg-neutral-50/40 mb-8">
+          <Eyebrow className="mb-3">Projects</Eyebrow>
+          <div className="divide-y divide-neutral-200 border-y border-neutral-200">
+            {projects.map((project) => (
+              <article key={project.title} className="py-4">
+                <h3 className="font-serif text-xl font-bold tracking-tight mb-2">
+                  {project.url ? (
+                    <a
+                      href={project.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="hover:text-editorial-red transition-colors"
+                    >
+                      {project.title}
+                    </a>
+                  ) : (
+                    project.title
+                  )}
+                </h3>
+                <p className="text-sm text-neutral-600 leading-relaxed mb-0">
+                  {project.description}
+                </p>
+              </article>
             ))}
           </div>
-        </div>
+        </Card>
 
-        {/* Social links — inline editorial */}
-        <div className="flex items-center gap-1 mt-4 font-sans text-xs text-neutral-500">
-          <span className="uppercase tracking-[0.15em] mr-2">Find me on</span>
-          {[
-            { url: "https://github.com/PierreLepagnol", label: "GitHub" },
-            { url: "https://www.linkedin.com/in/pierre-lepagnol", label: "LinkedIn" },
-            { url: "https://twitter.com/LepagnolPierre", label: "Twitter" },
-          ].map(({ url, label }, i, arr) => (
-            <span key={url}>
+        <Card id="articles-list" className="p-5 md:p-6 bg-neutral-50/40">
+          <Eyebrow className="mb-3">Articles</Eyebrow>
+
+          {posts.length === 0 ? (
+            <p className="text-neutral-500 py-2">No articles yet.</p>
+          ) : (
+            <div className="divide-y divide-neutral-200 border-y border-neutral-200">
+              {posts.map((post) => (
+                <article key={post._meta.path} className="py-4">
+                  <div className="font-sans text-xs uppercase tracking-[0.15em] text-neutral-500 mb-2">
+                    <time dateTime={post.date}>
+                      {format(parseISO(post.date), "LLLL d, yyyy")}
+                    </time>
+                    <span className="mx-2">&middot;</span>
+                    <span>{post.readTime} min read</span>
+                  </div>
+                  <h3 className="font-serif text-xl font-bold tracking-tight mb-2">
+                    <Link
+                      href={post.url}
+                      className="hover:text-editorial-red transition-colors"
+                    >
+                      {post.title}
+                    </Link>
+                  </h3>
+                  <p className="text-sm text-neutral-600 leading-relaxed mb-0">
+                    {post.excerpt}
+                  </p>
+                </article>
+              ))}
+            </div>
+          )}
+
+          {posts.length > 0 && (
+            <div className="mt-5">
               <Link
-                href={url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-ink font-medium underline decoration-1 underline-offset-3 hover:decoration-editorial-red transition-colors"
+                href="/posts"
+                className="inline-flex items-center border border-neutral-300 px-4 py-2 font-sans text-xs uppercase tracking-[0.15em] text-neutral-600 transition-colors hover:border-editorial-red hover:text-editorial-red"
               >
-                {label}
+                Voir tous les articles &rarr;
               </Link>
-              {i < arr.length - 1 && <span className="mx-1.5 text-neutral-400">/</span>}
-            </span>
-          ))}
-        </div>
-      </div>
+            </div>
+          )}
+        </Card>
+      </section>
     </div>
   );
 };

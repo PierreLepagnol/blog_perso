@@ -1,0 +1,10 @@
+projects:
+  - title: NLP Research Prototypes
+    description: Experimental work on machine learning and natural language processing methods.
+    url: https://github.com/PierreLepagnol
+
+  - title: PROEJTTT
+    description: Production-oriented data science projects delivered in consulting missions.
+
+  - title: This Technical Blog
+    description: A writing space to share practical notes from research and real-world implementation.

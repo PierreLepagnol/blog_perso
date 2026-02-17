@@ -1,5 +1,4 @@
 import { Header } from "@/components/Header";
-import NavBar from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import type { Metadata } from "next";
 import "./globals.css";
@@ -19,10 +18,9 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className="min-h-screen bg-newsprint text-ink font-body">
-        <div className="max-w-4xl mx-auto px-4">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6">
           <Header />
-          <NavBar />
-          <main className="py-8">{children}</main>
+          <main className="py-4">{children}</main>
           <Footer />
         </div>
       </body>
