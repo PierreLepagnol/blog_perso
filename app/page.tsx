@@ -94,8 +94,8 @@ const Home = () => {
               className="md:row-span-3 bg-neutral-50/50 overflow-hidden"
             >
               <ExportedImage
-                width={600}
-                height={750}
+                width={1024}
+                height={1024}
                 src="PierreLepagnol.webp"
                 alt="Pierre Lepagnol"
                 className="grayscale object-cover w-full h-full min-h-[280px]"
