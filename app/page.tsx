@@ -96,7 +96,7 @@ const Home = () => {
               <ExportedImage
                 width={600}
                 height={750}
-                src="PierreLepagnol.jpg"
+                src="PierreLepagnol.webp"
                 alt="Pierre Lepagnol"
                 className="grayscale object-cover w-full h-full min-h-[280px]"
               />
