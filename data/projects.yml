@@ -1,10 +1,11 @@
 projects:
-  - title: NLP Research Prototypes
-    description: Experimental work on machine learning and natural language processing methods.
-    url: https://github.com/PierreLepagnol
+  - title: SignalSwipe
+    description: A privacy-focused, personalized, daily tech and AI news curation feed
+    url: https://signalswipe.lepagnol.net/
 
-  - title: PROEJTTT
-    description: Production-oriented data science projects delivered in consulting missions.
+  - title: tools  & Side Projects
+    description: Among them a tool to extract comments on Overleaf projets, a SAAS to manage a small business, etc.
 
-  - title: This Technical Blog
-    description: A writing space to share practical notes from research and real-world implementation.
+  - title: My PhD Thesis
+    description: 3 year working at LISN/Paris Saclay University on the topic of "small language models for classification and information extraction".
+    url: Soon available on HAL.
