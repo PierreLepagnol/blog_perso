@@ -104,8 +104,8 @@ const Home = () => {
 
             <Card id="bio-summary" className="p-5 md:p-6">
               <p className="font-body text-neutral-700 leading-relaxed mb-4">
-                Currently pursuing a PhD at LISN/Paris-Saclay University while
-                consulting as a Data Scientist at SCIAM. My research sits at the
+                Freshly graduated PhD at LISN/Paris-Saclay University while
+                being AI Scientist consultant at SCIAM. My research sits at the
                 intersection of machine learning and natural language
                 processing.
               </p>
@@ -114,7 +114,7 @@ const Home = () => {
                 lessons learned from research to production work.
               </p>
               <a
-                href="/cv.pdf"
+                href="/CV_PierreLepagnol2026.pdf"
                 download
                 className="inline-flex items-center border border-neutral-300 px-4 py-2 font-sans text-xs uppercase tracking-[0.15em] text-neutral-600 transition-colors hover:border-editorial-red hover:text-editorial-red"
               >
@@ -126,9 +126,7 @@ const Home = () => {
               <Eyebrow className="mb-2">Current Roles</Eyebrow>
               <div className="space-y-3 text-sm text-neutral-700">
                 <div className="flex items-center justify-between gap-3">
-                  <p className="mb-0">
-                    PhD Student, LISN / Paris-Saclay University
-                  </p>
+                  <p className="mb-0">PhD, LISN / Paris-Saclay University</p>
                   <ExportedImage
                     width={72}
                     height={24}
@@ -138,7 +136,7 @@ const Home = () => {
                   />
                 </div>
                 <div className="flex items-center justify-between gap-3">
-                  <p className="mb-0">Data Scientist Consultant, SCIAM</p>
+                  <p className="mb-0">AI Scientist, SCIAM</p>
                   <ExportedImage
                     width={72}
                     height={24}

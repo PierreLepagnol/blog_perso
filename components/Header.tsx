@@ -16,7 +16,7 @@ export function Header() {
             unoptimized
           />
           <span className="font-serif text-3xl sm:text-4xl font-extrabold tracking-wide">
-            Pierre Lepagnol
+            Pierre Lepagnol, PhD
           </span>
         </Link>
         <p className="font-sans text-xs uppercase tracking-[0.2em] text-neutral-500 mt-3">

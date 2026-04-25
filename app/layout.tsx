@@ -4,7 +4,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Pierre LEPAGNOL — PhD Student & Data Scientist",
+  title: "Pierre LEPAGNOL - PhD Student & Data Scientist",
   description:
     "PhD Student in Computer Science at LISN/Paris-Saclay University and Data Scientist Consultant at SCIAM.",
   authors: [{ name: "Pierre Lepagnol" }],

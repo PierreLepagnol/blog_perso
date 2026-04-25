@@ -5,7 +5,8 @@ projects:
 
   - title: Tools  & Side Projects
     description: Among them a tool to extract comments on Overleaf projets, a SAAS to manage a small business, etc.
+    url: https://github.com/PierreLepagnol
 
   - title: My PhD Thesis
     description: 3 year working at LISN/Paris Saclay University on the topic of "small language models for classification and information extraction".
-    url: Soon available on HAL.
+    url: https://theses.fr/2026UPASG011
