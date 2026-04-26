@@ -27,6 +27,10 @@
 }
 
 @layer base {
+  html {
+    text-rendering: optimizeLegibility;
+  }
+
   body {
     font-family: var(--font-body);
     background-color: var(--color-newsprint);
@@ -37,8 +41,7 @@
   h1, h2, h3, h4, h5, h6 {
     font-family: var(--font-serif);
     font-weight: 700;
-    margin-bottom: 0.5rem;
-    line-height: 1.1;
+    line-height: 1.15;
   }
 
   h1 { font-size: 2rem; font-weight: 800; letter-spacing: -0.02em; }
@@ -68,26 +71,255 @@
   }
 }
 
-/* Table of contents */
+/* Table of contents — editorial sommaire */
 .page-outline {
   font-family: var(--font-sans);
-  font-size: 0.75rem;
+  max-width: 100%;
+  font-size: 0.72rem;
   text-transform: uppercase;
-  letter-spacing: 0.1em;
-  border-left: 2px solid var(--color-ink);
-  padding-left: 1rem;
-  margin-bottom: 2rem;
+  letter-spacing: 0.14em;
+  border-left: 2px solid var(--color-editorial-red);
+  padding: 0.1rem 0 0.1rem 1.6rem;
+  margin: 0 0 3rem;
+  counter-reset: toc-h2;
 }
+
+.page-outline::before {
+  content: "Au sommaire";
+  display: block;
+  font-family: var(--font-sans);
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.24em;
+  color: var(--color-editorial-red);
+  margin-bottom: 1rem;
+}
+
+.page-outline * { max-width: 100%; white-space: normal; }
 .page-outline ol { list-style: none; margin: 0; padding: 0; }
-.page-outline li { margin-bottom: 0.5rem; }
-.page-outline .page-link { color: var(--color-neutral-600); text-decoration: none; }
-.page-outline .page-link:hover { color: var(--color-ink); }
+
+.page-outline > ol > li {
+  counter-increment: toc-h2;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: baseline;
+  column-gap: 0.9rem;
+  padding: 0.55rem 0;
+  border-top: 1px dotted var(--color-neutral-200);
+  line-height: 1.5;
+}
+
+.page-outline > ol > li:first-child {
+  border-top: 0;
+  padding-top: 0;
+}
+
+.page-outline > ol > li::before {
+  content: counter(toc-h2, decimal-leading-zero);
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-weight: 600;
+  font-size: 1rem;
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--color-editorial-red);
+}
+
+.page-outline > ol > li > ol {
+  grid-column: 2;
+  margin-top: 0.45rem;
+}
+
+.page-outline ol ol li {
+  position: relative;
+  padding: 0.3rem 0 0.3rem 1rem;
+  font-size: 0.64rem;
+  letter-spacing: 0.16em;
+  color: var(--color-neutral-500);
+  line-height: 1.5;
+}
+
+.page-outline ol ol li::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0.78rem;
+  width: 0.55rem;
+  height: 1px;
+  background: var(--color-neutral-400, #a3a3a3);
+}
+
+.page-outline .page-link {
+  color: var(--color-neutral-700);
+  text-decoration: none;
+  transition: color 150ms ease;
+}
+.page-outline ol ol .page-link { color: var(--color-neutral-500); }
+.page-outline .page-link:hover { color: var(--color-editorial-red); }
 
 /* Code blocks */
-pre {
-  border: 1px solid var(--color-ink) !important;
-  border-top: none !important;
-}
 figure[data-rehype-pretty-code-figure] pre {
   background-color: var(--color-editor-bg) !important;
+}
+
+.mdx {
+  font-kerning: normal;
+  max-width: 100%;
+  overflow-wrap: break-word;
+}
+
+.mdx > p:first-of-type {
+  color: var(--color-neutral-700);
+  font-size: 1.18rem;
+  line-height: 1.85;
+}
+
+.mdx > p:first-of-type::first-letter {
+  font-family: var(--font-serif);
+  float: left;
+  font-size: 4.4rem;
+  line-height: 0.92;
+  font-weight: 800;
+  color: var(--color-ink);
+  padding: 0.35rem 0.6rem 0 0;
+  margin: 0.1rem 0.05rem 0 0;
+}
+
+.mdx :where(h2, h3, h4) {
+  position: relative;
+}
+
+.mdx :where(h2, h3, h4) a {
+  text-decoration: none;
+  color: inherit;
+}
+
+.mdx :where(h2, h3, h4) a:hover {
+  color: var(--color-editorial-red);
+}
+
+.mdx :where(h2, h3, h4):hover > a::before,
+.mdx :where(h2, h3, h4) > a:focus-visible::before {
+  content: "#";
+  position: absolute;
+  left: -1.4ch;
+  top: 0;
+  color: var(--color-editorial-red);
+  font-weight: 600;
+  opacity: 0.7;
+}
+
+@media (max-width: 900px) {
+  .mdx :where(h2, h3, h4):hover > a::before,
+  .mdx :where(h2, h3, h4) > a:focus-visible::before {
+    display: none;
+  }
+}
+
+.mdx :where(.mdx-blockquote)::before {
+  content: "\201C";
+  position: absolute;
+  left: 0.55rem;
+  top: -1.2rem;
+  font-family: var(--font-serif);
+  font-style: normal;
+  font-size: 4.5rem;
+  line-height: 1;
+  color: var(--color-editorial-red);
+  opacity: 0.22;
+  pointer-events: none;
+}
+
+.mdx-hr::after {
+  content: "\00B7  \00B7  \00B7";
+  display: inline-block;
+  font-family: var(--font-serif);
+  font-size: 1.5rem;
+  letter-spacing: 0.4em;
+  color: var(--color-neutral-500);
+}
+
+.mdx :where(p, li) strong {
+  color: var(--color-ink);
+  font-weight: 600;
+}
+
+.mdx :where(figure[data-rehype-pretty-code-figure]) {
+  margin: 2rem 0;
+}
+
+/* Weld CodeHead to the code block that follows it (figure or bare pre) */
+.mdx .mdx-code-head + figure[data-rehype-pretty-code-figure],
+.mdx .mdx-code-head + pre {
+  margin-top: 0;
+}
+
+.mdx .mdx-code-head + figure[data-rehype-pretty-code-figure] pre,
+.mdx .mdx-code-head + pre {
+  border-top: 0;
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
+}
+
+/* Round only the bottom of the head when welded */
+.mdx .mdx-code-head:has(+ figure[data-rehype-pretty-code-figure]),
+.mdx .mdx-code-head:has(+ pre) {
+  border-bottom: 0;
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+  box-shadow: none;
+}
+
+.mdx :where(pre code) {
+  border: 0;
+  background: transparent;
+  color: var(--shiki-dark, #e1e4e8);
+  padding: 0;
+  font-size: 0.88rem;
+  line-height: 1.75;
+  display: block;
+}
+
+.mdx :where(pre code span) {
+  color: var(--shiki-dark, inherit);
+}
+
+/* Per-line formatting from rehype-pretty-code */
+.mdx :where(pre code [data-line]) {
+  padding: 0 0.25rem;
+}
+
+.mdx :where(pre code [data-highlighted-line]) {
+  background: rgba(255, 255, 255, 0.06);
+  border-left: 2px solid var(--color-editorial-red);
+  padding-left: calc(0.25rem - 2px);
+}
+
+@media (max-width: 640px) {
+  .page-outline {
+    font-size: 0.66rem;
+    letter-spacing: 0.1em;
+    padding-left: 1.1rem;
+  }
+
+  .page-outline > ol > li {
+    column-gap: 0.7rem;
+  }
+
+  .page-outline > ol > li::before {
+    font-size: 0.9rem;
+  }
+
+  .page-outline .page-link {
+    overflow-wrap: anywhere;
+  }
+
+  .mdx > p:first-of-type {
+    font-size: 1.08rem;
+  }
+
+  .mdx > p:first-of-type::first-letter {
+    font-size: 3.4rem;
+    padding: 0.3rem 0.5rem 0 0;
+  }
 }

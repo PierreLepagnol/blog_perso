@@ -1,0 +1,10 @@
+#!/usr/bin/env sh
+set -eu
+
+changed_files="$(bun --silent run images:webp -- --webp-files)"
+
+if [ -n "$changed_files" ]; then
+  printf '%s\n' "$changed_files" | while IFS= read -r file; do
+    git add -- "$file"
+  done
+fi

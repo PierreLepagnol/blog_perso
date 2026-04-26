@@ -45,20 +45,24 @@ export default async function Page({
   if (!post) notFound();
 
   return (
-    <article className="max-w-2xl mx-auto">
+    <article className="mx-auto w-full min-w-0 max-w-[760px] px-1 sm:px-0">
       <Link
         href="/#articles"
-        className="font-sans text-xs uppercase tracking-[0.2em] text-neutral-500 hover:text-ink mb-6 inline-block"
+        className="mb-8 inline-flex font-sans text-xs uppercase tracking-[0.18em] text-neutral-500 transition-colors hover:text-ink"
       >
         &larr; Back to Home
       </Link>
 
-      <header className="mb-10 border-b border-neutral-200 pb-6">
-        <h1 className="font-serif text-3xl sm:text-4xl font-extrabold tracking-tight leading-tight mb-4">
+      <header className="mb-12 border-b border-neutral-200 pb-8">
+        <h1 className="mb-5 text-balance font-serif text-4xl font-extrabold leading-[1.08] tracking-tight sm:text-5xl">
           {post.title}
         </h1>
 
-        <div className="flex flex-wrap gap-2 font-sans text-xs uppercase tracking-[0.15em] text-neutral-500">
+        <p className="mb-5 max-w-2xl text-pretty break-words text-lg leading-8 text-neutral-600">
+          {post.excerpt}
+        </p>
+
+        <div className="flex flex-wrap items-center gap-2 font-sans text-xs uppercase tracking-[0.14em] text-neutral-500">
           <time dateTime={post.date}>
             {format(parseISO(post.date), "LLLL d, yyyy")}
           </time>
@@ -69,10 +73,10 @@ export default async function Page({
 
       <Mdx code={post.mdx} />
 
-      <div className="border-t border-neutral-200 mt-12 pt-6">
+      <div className="mt-16 border-t border-neutral-200 pt-7">
         <Link
           href="/#articles"
-          className="font-sans text-xs uppercase tracking-[0.2em] text-neutral-500 hover:text-ink"
+          className="font-sans text-xs uppercase tracking-[0.18em] text-neutral-500 transition-colors hover:text-ink"
         >
           Read more from home page &rarr;
         </Link>

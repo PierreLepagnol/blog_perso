@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build --turbopack && next-image-export-optimizer",
     "start": "next start",
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "images:webp": "bun scripts/convert-images-to-webp.ts"
   },
   "dependencies": {
     "@fortawesome/fontawesome-svg-core": "^7.1.0",
@@ -29,6 +30,7 @@
     "rehype-slug": "^6.0.0",
     "remark-gfm": "^4.0.1",
     "shiki": "^3.22.0",
+    "sharp": "^0.34.5",
     "tailwind-merge": "^3.4.0",
     "zod": "^3.22.4"
   },

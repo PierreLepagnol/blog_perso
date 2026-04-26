@@ -1,10 +1,10 @@
+import { allPosts, allProjects } from "content-collections";
+import { compareDesc, format, parseISO } from "date-fns";
 import ExportedImage from "next-image-export-optimizer";
 import Link from "next/link";
-import { compareDesc, format, parseISO } from "date-fns";
-import { allPosts, allProjects } from "content-collections";
-import { IoAtOutline } from "react-icons/io5";
-import { FaGithub, FaLinkedinIn, FaXTwitter } from "react-icons/fa6";
 import type { ComponentType, ReactNode } from "react";
+import { FaGithub, FaLinkedinIn, FaXTwitter } from "react-icons/fa6";
+import { IoAtOutline } from "react-icons/io5";
 
 const cx = (...classes: Array<string | undefined>) =>
   classes.filter(Boolean).join(" ");
@@ -98,6 +98,8 @@ const Home = () => {
                 height={1024}
                 src="PierreLepagnol.webp"
                 alt="Pierre Lepagnol"
+                loading="eager"
+                priority
                 className="grayscale object-cover w-full h-full min-h-[280px]"
               />
             </Card>
@@ -140,7 +142,7 @@ const Home = () => {
                   <ExportedImage
                     width={72}
                     height={24}
-                    src="logoSciam.png"
+                    src="logoSciam.webp"
                     alt="SCIAM logo"
                     className="h-5 w-auto shrink-0"
                   />

@@ -1,0 +1,18 @@
+---
+title: Cross-LoRA
+date: 2026-04-25
+excerpt: Transfert LoRA adapter from model to another
+tags: [ai, LLm, LoRA, Transfert, zero-data]
+---
+
+Les modèles changent souvent. 
+Lorsque vous entrainer un LoRA sur un modèle vous souhaiteriez l'utiliser sur un 
+autre modèle sans avoir à ré-ajuster le LoRA lui-même.
+
+C'est tout l'idée derrière le papier "Cross-LoRA: A Data-Free LoRA Transfer Framework across Heterogeneous LLMs"
+
+![Illustration de Cross-LoRA](/posts/cross-lora/main.webp)
+
+Dans cette suite d'article nous chercherons à comprendre le principe et la théorie de Cross-LoRA ainsi que l'implémentation et les détails opérationnels.
+
+## ⚙️ Le principe d'un LoRA

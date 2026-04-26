@@ -13,6 +13,8 @@ const LANGS: Record<string, { name: string; icon: React.ReactNode }> = {
   jsx: { name: "JSX", icon: <IoLogoReact /> },
   md: { name: "Markdown", icon: <IoLogoMarkdown /> },
   mdx: { name: "MDX", icon: <IoLogoMarkdown /> },
+  bash: { name: "Bash", icon: <IoTerminalOutline /> },
+  sh: { name: "Shell", icon: <IoTerminalOutline /> },
   console: { name: "console", icon: <IoTerminalOutline /> },
 };
 
@@ -20,18 +22,18 @@ export default function CodeHead({ name, lang }: { name: string; lang: string })
   const langData = LANGS[lang];
 
   return (
-    <div className="p-3 font-mono text-xs mt-8 text-neutral-400 bg-ink border border-ink border-b-0 flex items-center w-full">
-      <div className="hidden sm:flex items-center mr-3 gap-1.5">
-        <span className="w-2.5 h-2.5 bg-editor-red block" />
-        <span className="w-2.5 h-2.5 bg-editor-yellow block" />
-        <span className="w-2.5 h-2.5 bg-editor-green block" />
+    <div className="mdx-code-head mt-8 flex w-full items-center gap-3 rounded-t-md border border-neutral-700/60 border-b border-b-neutral-800 bg-editor-bg px-4 py-2.5 font-mono text-[0.78rem] text-neutral-300 shadow-sm">
+      <div className="hidden sm:flex items-center gap-1.5">
+        <span className="block h-2.5 w-2.5 rounded-full bg-editor-red" />
+        <span className="block h-2.5 w-2.5 rounded-full bg-editor-yellow" />
+        <span className="block h-2.5 w-2.5 rounded-full bg-editor-green" />
       </div>
-      <div className="flex justify-between grow">
-        {name && <span>{name}</span>}
+      <div className="flex grow items-center justify-between">
+        {name && <span className="truncate">{name}</span>}
         {langData && (
-          <div className="flex items-center gap-1 text-neutral-500">
-            {langData.icon}
-            <span className="uppercase tracking-widest text-[10px]">{langData.name}</span>
+          <div className="flex items-center gap-1.5 text-neutral-500">
+            <span className="text-sm">{langData.icon}</span>
+            <span className="text-[0.65rem] uppercase tracking-[0.18em]">{langData.name}</span>
           </div>
         )}
       </div>

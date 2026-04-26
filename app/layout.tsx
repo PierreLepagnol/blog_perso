@@ -17,8 +17,8 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className="min-h-screen bg-newsprint text-ink font-body">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6">
+      <body className="min-h-screen overflow-x-hidden bg-newsprint text-ink font-body">
+        <div className="mx-auto w-full max-w-7xl min-w-0 overflow-hidden px-4 sm:px-6">
           <Header />
           <main className="py-4">{children}</main>
           <Footer />

@@ -10,7 +10,7 @@ export function MdxCard({ href, className, children, disabled, ...props }: CardP
   return (
     <div
       className={cn(
-        "group relative border border-ink p-6 hover:shadow-[4px_4px_0_0_#111] hover:-translate-x-0.5 hover:-translate-y-0.5 transition-all",
+        "group relative rounded-sm border border-neutral-200 bg-white/70 p-6 shadow-sm transition-all hover:-translate-y-0.5 hover:border-neutral-300 hover:shadow-md",
         disabled && "cursor-not-allowed opacity-60",
         className
       )}
