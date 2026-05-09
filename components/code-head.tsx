@@ -24,9 +24,9 @@ export default function CodeHead({ name, lang }: { name: string; lang: string })
   return (
     <div className="mdx-code-head mt-8 flex w-full items-center gap-3 rounded-t-md border border-neutral-700/60 border-b border-b-neutral-800 bg-editor-bg px-4 py-2.5 font-mono text-[0.78rem] text-neutral-300 shadow-sm">
       <div className="hidden sm:flex items-center gap-1.5">
-        <span className="block h-2.5 w-2.5 rounded-full bg-editor-red" />
-        <span className="block h-2.5 w-2.5 rounded-full bg-editor-yellow" />
-        <span className="block h-2.5 w-2.5 rounded-full bg-editor-green" />
+        <span className="block size-2.5 rounded-full bg-editor-red" />
+        <span className="block size-2.5 rounded-full bg-editor-yellow" />
+        <span className="block size-2.5 rounded-full bg-editor-green" />
       </div>
       <div className="flex grow items-center justify-between">
         {name && <span className="truncate">{name}</span>}

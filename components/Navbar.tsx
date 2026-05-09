@@ -1,4 +1,10 @@
 import Link from "next/link";
+import {
+  NavigationMenu,
+  NavigationMenuItem,
+  NavigationMenuLink,
+  NavigationMenuList,
+} from "@/components/ui/navigation-menu";
 
 const NavBar = () => {
   const links = [
@@ -9,18 +15,18 @@ const NavBar = () => {
   ];
 
   return (
-    <nav className="border-b border-neutral-200 py-3">
-      <div className="flex items-center justify-center gap-6">
+    <nav className="border-b border-border py-3">
+      <NavigationMenu className="mx-auto" viewport={false}>
+        <NavigationMenuList className="flex-wrap gap-1">
         {links.map(({ href, label }) => (
-          <Link
-            key={href}
-            href={href}
-            className="font-sans text-xs uppercase tracking-[0.2em] font-semibold text-neutral-500 hover:text-ink transition-colors duration-200"
-          >
-            {label}
-          </Link>
+          <NavigationMenuItem key={href}>
+            <NavigationMenuLink asChild className="font-sans text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">
+              <Link href={href}>{label}</Link>
+            </NavigationMenuLink>
+          </NavigationMenuItem>
         ))}
-      </div>
+        </NavigationMenuList>
+      </NavigationMenu>
     </nav>
   );
 };

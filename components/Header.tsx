@@ -3,7 +3,7 @@ import Link from "next/link";
 
 export function Header() {
   return (
-    <header className="overflow-hidden border-b border-neutral-200 py-4">
+    <header className="overflow-hidden border-b border-border py-4">
       <div className="min-w-0 text-center">
         <Link href="/" className="inline-flex max-w-full flex-wrap items-center justify-center gap-2 sm:gap-3">
           <ExportedImage
@@ -19,7 +19,7 @@ export function Header() {
             Pierre Lepagnol, PhD
           </span>
         </Link>
-        <p className="mx-auto mt-3 max-w-full text-balance break-words font-sans text-[0.68rem] uppercase tracking-[0.16em] text-neutral-500 sm:text-xs sm:tracking-[0.2em]">
+        <p className="mx-auto mt-3 max-w-full text-balance break-words font-sans text-[0.68rem] uppercase tracking-[0.16em] text-muted-foreground sm:text-xs sm:tracking-[0.2em]">
           Notes on NLP, ML and applied data science
         </p>
       </div>

@@ -1,6 +1,9 @@
 import Link from "next/link";
 import { compareDesc, format, parseISO } from "date-fns";
 import { allPosts } from "content-collections";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
 
 export default function PostsPage() {
   const posts = allPosts.sort((a, b) =>
@@ -9,7 +12,11 @@ export default function PostsPage() {
 
   if (posts.length === 0) {
     return (
-      <p className="text-center text-neutral-500 py-16">No articles yet.</p>
+      <Card>
+        <CardContent className="py-16 text-center text-muted-foreground">
+          No articles yet.
+        </CardContent>
+      </Card>
     );
   }
 
@@ -19,15 +26,20 @@ export default function PostsPage() {
         Articles
       </h1>
 
-      <div className="divide-y divide-ink">
+      <div>
+        <Separator className="bg-ink" />
         {posts.map((post) => (
           <article key={post._meta.path} className="py-6">
             <Link href={post.url} className="group block">
               <div className="flex flex-wrap gap-2 mb-2">
                 {post.tags.slice(0, 3).map((tag) => (
-                  <span key={tag} className="font-mono text-[10px] uppercase tracking-[0.15em] text-neutral-500">
+                  <Badge
+                    key={tag}
+                    variant="outline"
+                    className="font-mono text-[10px] uppercase tracking-[0.15em] text-muted-foreground"
+                  >
                     {tag}
-                  </span>
+                  </Badge>
                 ))}
               </div>
 
@@ -48,6 +60,7 @@ export default function PostsPage() {
             </Link>
           </article>
         ))}
+        <Separator className="bg-ink" />
       </div>
     </div>
   );

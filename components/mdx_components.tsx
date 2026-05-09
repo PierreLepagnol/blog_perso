@@ -6,6 +6,12 @@ import { cn } from "@/lib/utils";
 import { Callout } from "@/components/callout";
 import { MdxCard } from "@/components/mdx-card";
 import CodeHead from "@/components/code-head";
+import {
+  Table,
+  TableCell,
+  TableHead,
+  TableRow,
+} from "@/components/ui/table";
 
 type Props = { className?: string; [key: string]: any };
 
@@ -54,10 +60,10 @@ const components = {
     );
   },
   ul: ({ className, ...props }: Props) => (
-    <ul className={cn("my-7 ml-6 list-disc space-y-3 marker:text-editorial-red text-neutral-700", className)} {...props} />
+    <ul className={cn("my-7 ml-6 list-disc marker:text-editorial-red text-neutral-700 [&>li+li]:mt-3", className)} {...props} />
   ),
   ol: ({ className, ...props }: Props) => (
-    <ol className={cn("my-7 ml-6 list-decimal space-y-3 marker:font-sans marker:text-sm marker:font-semibold marker:text-editorial-red text-neutral-700", className)} {...props} />
+    <ol className={cn("my-7 ml-6 list-decimal marker:font-sans marker:text-sm marker:font-semibold marker:text-editorial-red text-neutral-700 [&>li+li]:mt-3", className)} {...props} />
   ),
   li: ({ className, ...props }: Props) => (
     <li className={cn("break-words pl-2 text-[1.06rem] leading-8", className)} {...props} />
@@ -84,17 +90,17 @@ const components = {
   ),
   table: ({ className, ...props }: React.HTMLAttributes<HTMLTableElement>) => (
     <div className="my-8 w-full overflow-x-auto rounded-sm border border-neutral-200 bg-white shadow-sm">
-      <table className={cn("w-full border-collapse text-sm", className)} {...props} />
+      <Table className={cn("w-full border-collapse text-sm", className)} {...props} />
     </div>
   ),
   tr: ({ className, ...props }: React.HTMLAttributes<HTMLTableRowElement>) => (
-    <tr className={cn("border-b border-neutral-200 last:border-b-0 even:bg-neutral-100/70", className)} {...props} />
+    <TableRow className={cn("last:border-b-0 even:bg-neutral-100/70", className)} {...props} />
   ),
   th: ({ className, ...props }: Props) => (
-    <th className={cn("px-4 py-3 text-left font-sans text-xs font-semibold uppercase tracking-[0.14em] text-neutral-600", className)} {...props} />
+    <TableHead className={cn("px-4 py-3 text-left font-sans text-xs font-semibold uppercase tracking-[0.14em] text-neutral-600", className)} {...props} />
   ),
   td: ({ className, ...props }: Props) => (
-    <td className={cn("px-4 py-3 text-left leading-7 text-neutral-700", className)} {...props} />
+    <TableCell className={cn("px-4 py-3 text-left leading-7 text-neutral-700", className)} {...props} />
   ),
   pre: ({ className, ...props }: Props) => (
     <pre className={cn("overflow-x-auto rounded-md border border-neutral-700/60 bg-editor-bg px-5 py-4 text-sm leading-7 shadow-sm", className)} {...props} />
