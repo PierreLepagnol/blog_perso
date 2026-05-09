@@ -280,7 +280,7 @@ L'argument central - *« deux LLM modernes partagent une géométrie dominante �
 
 Conclusion opérationnelle : si l'on observe un transfert qui *casse*, ce n'est en général pas l'algèbre qui est en cause, mais l'une des conditions précédentes qui n'est pas satisfaite (familles trop éloignées, modules sans correspondance, profondeurs très différentes).
 
-## 6 ter. Un mini exemple chiffré
+## Un mini exemple chiffré
 
 Reprenons le cas concret Qwen2.5-1.5B $\rightarrow$ LLaMA-3.2-3B qui sert de fil rouge à la Partie 2. Pour une couche d'attention `q_proj` typique :
 
@@ -314,7 +314,7 @@ La SVD ne renvoie que $\min(m, n)$ directions ; au-delà on ne gagne rien. En pr
 
 **Et si l'adaptateur source utilise du *rank-stabilized* LoRA ou du DoRA ?** Le squelette de l'algorithme reste valable, mais il faut adapter le facteur d'échelle ($\alpha / r$ vs $\alpha / \sqrt{r}$) et, pour DoRA, traiter en plus la composante de magnitude. Cross-LoRA tel qu'écrit cible le LoRA standard.
 
-## 7. Ce que dit la pratique
+## Ce que dit la pratique
 
 Le papier teste Cross-LoRA sur quatre modèles et quatre benchmarks de raisonnement en QCM :
 
