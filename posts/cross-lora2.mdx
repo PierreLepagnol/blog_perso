@@ -5,79 +5,45 @@ excerpt: De l'algorithme du papier à un adaptateur PEFT qui se recharge dans le
 tags: [ai, LLM, LoRA, Transfert, zero-data, implementation]
 ---
 
-Dans la [Partie 1](/posts/cross-lora) on a posé l'algèbre de Cross-LoRA :
-**SVD → alignement → projection**. Cet article passe à la pratique : prendre
-`Algorithm 1`, en faire un pipeline qui produit un adaptateur PEFT rechargeable
+Dans la [Partie 1](/posts/cross-lora) nous avons posé les briques théoriques de Cross-LoRA.
+Ici nous passons à la pratique ! En prenant l'`Algorithm 1`, pour en faire un pipeline complet qui produit un adaptateur PEFT chargeable
 dans le modèle cible.
 
-Fil rouge des exemples : `Qwen2.5-1.5B → LLaMA-3.2-3B`.
+Tout au long de l'article nous prendrons l'exemple de 2 modèles: `Qwen2.5-1.5B` $\rightarrow$ `LLaMA-3.2-3B`.
 
-> *Figure 1 (placeholder)* — **schéma TikZ à produire** : pipeline horizontal en 7
-> étapes (`charger → matcher → SVD → aligner → projeter → sérialiser → valider`),
-> avec les artefacts qui circulent entre chaque étape (poids bruts → tenseurs
-> indexés → bases SVD → bases alignées → adaptateur projeté → checkpoint PEFT →
-> rapport de validation).
+Tout le code est disponible sur [GitHub](https://github.com/).
 
-## Sommaire
 
-1. Le fossé entre papier et code
-2. Pipeline en 7 étapes
-3. I/O des checkpoints
-4. Normalisation et matching des modules
-5. Extraction des sous-espaces (SVD)
-6. Alignement (moindres carrés)
-7. Projection LoRA — `Algorithm 1` complet
-8. Validation à trois niveaux
-9. Coût et reproductibilité
-10. Pièges à éviter
-11. Conclusion
+## Ce que le papier ne précise pas
 
----
+L'article Cross-LoRA, aussi bien écrit soit-il, ne précise pas des composants très opérationnels à savoir:
 
-## 1. Le fossé entre papier et code
+- le **nommage et matching des modules** entre familles. En effet, les modèles Qwen, LLaMA, Gemma n'ont pas les mêmes conventions;
+- le **mapping inter-couches** quand les profondeurs diffèrents (24 vs 32 couches) ;
+- le **surcharge du symbole $r$** : $\rlora = 16$ (rang LoRA) vs $\rsvd = 320$ (rang de sous-espace). Il y a deux quantités sans rapport ;
+- le **format exact** du checkpoint PEFT à produire en sortie.
 
-Ce que le papier ne précise pas et qu'il faut figer dès le départ :
+Ainsi, dès le départ, nous prendrons les décisions suivantes pour ce pipeline :
 
-- **nommage et matching des modules** entre familles (Qwen, LLaMA, Gemma n'ont pas
-  les mêmes conventions) ;
-- **mapping inter-couches** quand les profondeurs diffèrent (24 vs 32 couches) ;
-- **surcharge du symbole `r`** : `r_lora = 16` (rang LoRA) vs `r_svd = 320`
-  (rang de sous-espace) — deux quantités sans rapport ;
-- **format exact** du checkpoint PEFT à produire en sortie.
-
-Décisions prises dès le départ pour ce pipeline :
-
-- séparer `r_lora` et `r_svd` partout dans le code (deux variables nommées) ;
+- séparer $\rlora$ et $\rsvd$ partout dans le code (deux variables nommées) ;
 - **`Algorithm 1` comme référence** d'implémentation (et non l'équation globale) ;
-- matching **par index de couche + type de module**, fallback proportionnel sur
-  la profondeur si les nombres de couches diffèrent ;
-- sérialisation au format `peft` (Hugging Face) standard, avec `adapter_config.json`
-  + `adapter_model.safetensors`.
+- matching **par index de couche + type de module**, fallback proportionnel sur la profondeur si les nombres de couches diffèrent;
+- sérialisation au format `peft` (Hugging Face) standard, avec `adapter_config.json` + `adapter_model.safetensors`.
 
-## 2. Pipeline en 7 étapes
+## Pipeline en 7 étapes
 
-```
-charger  →  matcher  →  SVD  →  aligner  →  projeter  →  sérialiser  →  valider
-```
+![Pipeline Cross-LoRA en 7 étapes](/posts/cross-lora/fig2_1_pipeline.webp)
 
-Chaque étape est isolée : un échec à l'étape *matcher* doit produire un rapport
-exploitable, pas un crash trois étapes plus loin.
+Chaque étape est isolée : un échec à l'étape *matcher* doit produire un rapport avec une erreur expliquée et non un crash trois étapes plus loin.
 
-## 3. I/O des checkpoints
+## Étape 1: I/O des checkpoints
 
-### 3.1 Ce qu'on charge
+### Inputs, Indexation & Outputs
 
-- `W_s` : poids de base du modèle source (figés).
-- `W_t` : poids de base du modèle cible (figés).
-- Adaptateur source : `lora_A`, `lora_B`, `alpha`, `r_lora`, et la liste des
-  modules visés.
+Nous devons charger en mémoire, pour chaque couche, les poids source $\Ws$ et cible $\Wt$, ainsi que l'adaptateur source `lora_A`, `lora_B`, $\alpha$, $\rlora$, et la liste des modules visés.
 
-### 3.2 Indexation logique
-
-On indexe chaque tenseur par un triplet `(layer_id, module_type, side)` où `side`
-prend la valeur `"out"` (côté `B`, espace de sortie) ou `"in"` (côté `A`, espace
-d'entrée). Ce schéma permet ensuite de joindre source et cible sans dépendre du
-nommage propre à chaque famille de modèles.
+On indexe chaque tenseur par un triplet `(layer_id, module_type, side)` où `side` prend la valeur `"out"` (côté $B$, espace de sortie) ou `"in"` (côté $A$, espace d'entrée). 
+Ce schéma permet ensuite de joindre source et cible sans dépendre du nommage propre à chaque famille de modèles.
 
 ```python
 @dataclass(frozen=True)
@@ -87,9 +53,7 @@ class TensorKey:
     side: str          # "in" ou "out"
 ```
 
-### 3.3 Sortie
-
-Un répertoire au format PEFT compatible `from_pretrained` :
+En sortie nous avons besoin d'un répertoire au format PEFT compatible `from_pretrained` :
 
 ```
 adapter/
@@ -97,11 +61,9 @@ adapter/
 └── adapter_model.safetensors # tenseurs nommés selon la convention PEFT cible
 ```
 
-## 4. Normalisation et matching des modules
+## Étape 2: Matching des modules & Normalisation
 
-### 4.1 Canonicalisation des noms
-
-Les conventions de nommage diffèrent :
+Comme cité précédemment, les conventions de nommage diffèrent entre les modèles. 
 
 | Famille | Attention                                              | MLP                                          |
 |---------|--------------------------------------------------------|----------------------------------------------|
@@ -109,12 +71,9 @@ Les conventions de nommage diffèrent :
 | Qwen    | `q_proj`, `k_proj`, `v_proj`, `o_proj` (avec biais sur QKV) | `gate_proj`, `up_proj`, `down_proj`     |
 | Gemma   | `q_proj`, `k_proj`, `v_proj`, `o_proj`                  | `gate_proj`, `up_proj`, `down_proj`          |
 
-Bonne nouvelle : pour les sept modules visés, les noms convergent. Les pièges sont
-ailleurs : présence/absence de biais (Qwen QKV), `RMSNorm` vs `LayerNorm`, têtes
-groupées (GQA) qui changent les dimensions de `k_proj` et `v_proj` sans changer le
-nom.
+Bonne nouvelle : pour les sept modules visés, les noms convergent. Les pièges sont ailleurs : présence/absence de biais (Qwen QKV), `RMSNorm` vs `LayerNorm`, têtes groupées (GQA) qui changent les dimensions de $k_{\text{proj}}$ et $v_{\text{proj}}$ sans changer le nom.
 
-### 4.2 Sept modules cibles
+###  Sept modules cibles
 
 ```python
 TARGET_MODULES = (
@@ -123,7 +82,7 @@ TARGET_MODULES = (
 )
 ```
 
-### 4.3 Stratégie de matching
+###  Stratégie de matching
 
 ```python
 def match_layers(n_src: int, n_tgt: int) -> list[tuple[int, int]]:
@@ -140,10 +99,9 @@ def match_layers(n_src: int, n_tgt: int) -> list[tuple[int, int]]:
     ]
 ```
 
-### 4.4 Rapport de couverture
+### Rapport de couverture
 
-> **Règle** : ne jamais publier un adaptateur partiel sans signaler le taux de
-> couverture. Un module manquant est un trou silencieux dans le transfert.
+**Règle** : ne jamais publier un adaptateur partiel sans signaler le taux de couverture. Un module manquant est un trou silencieux dans le transfert.
 
 Le rapport inclut :
 
@@ -152,9 +110,9 @@ Le rapport inclut :
 - résidus moyens et max d'alignement (cf. § 6) ;
 - énergie SVD conservée par couche (cf. § 5).
 
-## 5. Extraction des sous-espaces (SVD)
+## Extraction des sous-espaces (SVD)
 
-### 5.1 SVD tronquée
+### SVD tronquée
 
 ```python
 def truncated_svd(W: torch.Tensor, r_svd: int) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
@@ -166,16 +124,12 @@ def truncated_svd(W: torch.Tensor, r_svd: int) -> tuple[torch.Tensor, torch.Tens
 
 Notes :
 
-- on **caste en `float32`** avant la SVD : `bfloat16` est trop bruité pour les
-  petites valeurs singulières ;
-- on renvoie `V` (et non `Vh`) pour rester cohérent avec la convention
-  `W ≈ U Σ Vᵀ` du papier.
+- on **caste en `float32`** avant la SVD : `bfloat16` est trop bruité pour les petites valeurs singulières ;
+- on renvoie $V$ (et non $V^\top$) pour rester cohérent avec la convention $W \approx U \Sigma V^\top$ du papier.
 
-### 5.2 Cache par poids de base
+### Cache par poids de base
 
-Sans cache, on recalcule la même SVD pour les côtés `A` et `B` du même module — et
-plus généralement à chaque appel. Avec un dictionnaire indexé par `id(W)` ou par
-hash du tenseur, on divise le temps de transfert par 2 environ.
+Sans cache, on recalcule la même SVD pour les côtés $A$ et $B$ du même module - et plus généralement à chaque appel. Avec un dictionnaire indexé par `id(W)` ou par hash du tenseur, on divise le temps de transfert par 2 environ.
 
 ```python
 @functools.lru_cache(maxsize=None)
@@ -184,23 +138,29 @@ def svd_cached(weight_id: int, r_svd: int) -> tuple[torch.Tensor, torch.Tensor, 
     return truncated_svd(W, r_svd)
 ```
 
-### 5.3 Diagnostics SVD
+### Diagnostics SVD
 
 Avant d'utiliser une SVD, vérifier :
 
-- **énergie conservée** : `sum(S[:r_svd]**2) / sum(S**2)` — typiquement > 0.95 sur
-  les couches d'attention pour `r_svd = 320`, modèles 1.5B–3B ;
-- **orthonormalité** : `||UᵀU − I||_F` proche de zéro ;
-- **shapes** : `U ∈ R^(m × r_svd)`, `V ∈ R^(n × r_svd)`.
+- **énergie conservée** : $\sum_{i=1}^{\rsvd} S_i^2 \,/\, \sum_i S_i^2$ - typiquement $> 0.95$ sur
+  les couches d'attention pour $\rsvd = 320$, modèles 1.5B–3B ;
+- **orthonormalité** : $\lVert U^\top U - I \rVert_F$ proche de zéro ;
+- **shapes** : $U \in \R^{m \times \rsvd}$, $V \in \R^{n \times \rsvd}$.
 
-> *Figure 2 (placeholder)* — **graphique à produire (matplotlib → PDF)** : courbe
-> de l'énergie SVD cumulée en fonction du rang `r`, pour quelques couches typiques
-> (attention vs MLP, modèles 1.5B vs 3B). Marquer les rangs `r = 80, 160, 320` en
-> verticale pour situer les choix du papier.
+![Énergie SVD cumulée par rang](/posts/cross-lora/fig2_2_svd_energy.webp)
 
-## 6. Alignement (moindres carrés)
+## Alignement (moindres carrés)
 
-### 6.1 Résolution
+### Résolution
+
+On cherche les matrices d'alignement $\PU \in \R^{m_t \times m_s}$ et $\PV \in \R^{n_t \times n_s}$ solutions de :
+
+$$
+\PU = \operatorname*{argmin}_{P} \, \lVert P\, \Us - \Ut \rVert_F^2,
+\qquad
+\PV = \operatorname*{argmin}_{P} \, \lVert P\, \Vs - \Vt \rVert_F^2.
+$$
+
 
 ```python
 def solve_alignment(U_s: torch.Tensor, U_t: torch.Tensor) -> torch.Tensor:
@@ -214,39 +174,60 @@ def solve_alignment(U_s: torch.Tensor, U_t: torch.Tensor) -> torch.Tensor:
     return sol.solution.T.contiguous()
 ```
 
-On applique la même fonction à `(V_s, V_t)` pour obtenir `P_V`.
+On applique la même fonction à $(\Vs, \Vt)$ pour obtenir $\PV$.
 
-### 6.2 Construire les bases alignées
+### Construire les bases alignées
+
+Les bases source ré-exprimées dans les dimensions cible sont :
+
+$$
+\widetilde{U}_s = \PU\, \Us \;\in\; \R^{m_t \times \rsvd},
+\qquad
+\widetilde{V}_s = \PV\, \Vs \;\in\; \R^{n_t \times \rsvd}.
+$$
 
 ```python
 U_tilde_s = P_U @ U_s          # ∈ R^(m_t × r_svd)
 V_tilde_s = P_V @ V_s          # ∈ R^(n_t × r_svd)
 ```
 
-### 6.3 Monitorer les résidus
+### Monitorer les résidus
 
 Deux quantités à logguer pour chaque couche :
+
+$$
+\mathrm{res}_U \;=\; \frac{\lVert \PU\, \Us - \Ut \rVert_F}{\lVert \Ut \rVert_F},
+\qquad
+\mathrm{res}_V \;=\; \frac{\lVert \PV\, \Vs - \Vt \rVert_F}{\lVert \Vt \rVert_F}.
+$$
 
 ```python
 res_U = torch.linalg.norm(P_U @ U_s - U_t) / torch.linalg.norm(U_t)
 res_V = torch.linalg.norm(P_V @ V_s - V_t) / torch.linalg.norm(V_t)
 ```
 
-Empiriquement (Qwen2.5-1.5B → LLaMA-3.2-3B) :
+Empiriquement (Qwen2.5-1.5B $\rightarrow$ LLaMA-3.2-3B) :
 
-- `res_U` typique : 0.4–0.7 sur les couches d'attention, plus haut sur les MLP ;
-- une couche au-dessus de 0.95 en résidu relatif est suspecte — le transfert sur
+- $\mathrm{res}_U$ typique : $0.4$–$0.7$ sur les couches d'attention, plus haut sur les MLP ;
+- une couche au-dessus de $0.95$ en résidu relatif est suspecte - le transfert sur
   cette couche n'apportera rien.
 
-> *Figure 3 (placeholder)* — **heatmap à produire (matplotlib → PDF)** : matrice
-> des résidus d'alignement, avec en lignes les couches et en colonnes les sept
-> modules cibles. Échelle de couleur : vert (résidu faible) → rouge (résidu
-> élevé). Permet de repérer en un coup d'œil les modules / couches qui
-> transfèrent mal.
+![Heatmap des résidus d'alignement](/posts/cross-lora/fig2_3_residuals_heatmap.webp)
 
-## 7. Projection LoRA — `Algorithm 1` complet
+## Projection LoRA - `Algorithm 1` complet
 
-### 7.1 Pseudo-code
+Le cœur de la projection s'écrit, pour chaque module aligné :
+
+$$
+\Bt \;=\; \widetilde{U}_s\, \widetilde{U}_s^{\top}\, \Bs,
+\qquad
+\At \;=\; \As\, \widetilde{V}_s\, \widetilde{V}_s^{\top}.
+$$
+
+avec $\As \in \R^{\rlora \times n_s}$, $\Bs \in \R^{m_s \times \rlora}$, et en sortie
+$\At \in \R^{\rlora \times n_t}$, $\Bt \in \R^{m_t \times \rlora}$.
+
+### Pseudo-code
 
 ```
 Entrées :
@@ -285,7 +266,7 @@ Pour chaque (layer_src, layer_tgt) dans le matching de couches :
       B_t[layer_tgt, module_type] = B_t_lm
 ```
 
-### 7.2 Implémentation PyTorch (cœur)
+### Implémentation PyTorch (cœur)
 
 ```python
 def project_lora_pair(
@@ -308,7 +289,7 @@ def project_lora_pair(
     return A_t, B_t
 ```
 
-### 7.3 Orchestrateur complet
+### Orchestrateur complet
 
 Voici l'enchaînement complet, en pseudo-Python lisible. Il suffit de coller les
 fonctions précédentes pour obtenir une version exécutable.
@@ -353,176 +334,137 @@ def cross_lora_transfer(
 
 Trois choses à remarquer :
 
-- la **boucle est plate** : couches × modules. Toute logique propre à une famille
-  (biais Qwen, GQA) doit être absorbée par `get_weight` / `get_lora_*` — pas
-  injectée dans la boucle ;
-- les exceptions de matching sont **comptées, pas levées**, pour produire un
-  rapport de couverture au lieu d'un crash ;
+- la **boucle est plate** : couches $\times$ modules. Toute logique propre à une famille (biais Qwen, GQA) doit être absorbée par `get_weight` / `get_lora_*` - pas injectée dans la boucle ;
+- les exceptions de matching sont **comptées, pas levées**, pour produire un rapport de couverture au lieu d'un crash ;
 - le cast vers `base_tgt.dtype` est fait **en sortie** uniquement.
 
-### 7.4 Encadré — biais Qwen sur QKV
+### Encadré - biais Qwen sur QKV
 
 Qwen2.5 attache des biais à `q_proj`, `k_proj`, `v_proj` que LLaMA-3.2 et Gemma-2
 n'ont pas. Trois options pratiques :
 
-1. **Ignorer les biais source** quand la cible n'en a pas (option par défaut,
-   simple et sûre). Conséquence : on perd la composante de translation apprise
-   côté source — mineur en général.
-2. **Les projeter comme des vecteurs** dans l'espace de sortie via `Ũ_s Ũ_sᵀ`
-   appliqué côté gauche, et les attacher si la cible accepte un biais.
-3. **Les rejeter avec un avertissement** quand la cible n'en a pas et que le
-   norme du biais source est non négligeable.
+1. **Ignorer les biais source** quand la cible n'en a pas (option par défaut, simple et sûre). Conséquence : on perd la composante de translation apprise côté source - mineur en général.
+2. **Les projeter comme des vecteurs** dans l'espace de sortie via $\widetilde{U}_s \widetilde{U}_s^{\top}$ appliqué côté gauche, et les attacher si la cible accepte un biais.
+3. **Les rejeter avec un avertissement** quand la cible n'en a pas et que le norme du biais source est non négligeable.
 
 Ce choix doit apparaître dans le rapport de couverture.
 
-### 7.5 Packaging final
+### Packaging final
 
-- caster vers le `dtype` du modèle cible (`bfloat16` typiquement) **après** les
-  calculs en `float32` ;
-- réinjecter `alpha` (par défaut on garde l'`alpha` source — voir Table 5 du
-  papier qui suggère parfois `alpha = 64` côté cible) ;
-- écrire `adapter_config.json` avec `target_modules = TARGET_MODULES`,
-  `r = r_lora`, `lora_alpha = alpha`, `base_model_name_or_path = <modèle cible>` ;
+- caster vers le `dtype` du modèle cible (`bfloat16` typiquement) **après** les calculs en `float32` ;
+- réinjecter $\alpha$ (par défaut on garde l'$\alpha$ source - voir Table 5 du papier qui suggère parfois $\alpha = 64$ côté cible) ;
+- écrire `adapter_config.json` avec `target_modules = TARGET_MODULES`, `r = ` $\rlora$, `lora_alpha = ` $\alpha$, `base_model_name_or_path = <modèle cible>` ;
 - sérialiser les tenseurs au format `safetensors`.
 
-## 8. Validation à trois niveaux
+## Validation à trois niveaux
 
-À faire **dans cet ordre** — chaque niveau est moins coûteux à corriger que le
-suivant.
+À faire **dans cet ordre** - chaque niveau est moins coûteux à corriger que le suivant.
 
-### 8.1 Niveau 1 — Algébrique
+### Niveau 1 - Algébrique
 
 Pour chaque module transféré :
 
 - shapes attendues respectées ;
 - dtype final correct ;
 - pas de NaN / Inf ;
-- norme `||A_t||_F` et `||B_t||_F` du même ordre que côté source (un facteur 100
-  est suspect).
+- normes $\lVert \At \rVert_F$ et $\lVert \Bt \rVert_F$ du même ordre que côté source (un facteur $100$ est suspect).
 
-### 8.2 Niveau 2 — Compatibilité
+### Niveau 2 - Compatibilité
 
-- l'adaptateur **se recharge** via `PeftModel.from_pretrained(base_model, path)`
-  sans avertissement de tenseurs manquants ;
+- l'adaptateur **se recharge** via `PeftModel.from_pretrained(base_model, path)` sans avertissement de tenseurs manquants ;
 - tous les modules attendus sont présents dans la liste retournée par PEFT ;
 - une passe avant sur un batch jouet ne plante pas.
 
-### 8.3 Niveau 3 — Papier
+### Niveau 3 - Papier
 
-Reproduire au moins **`Qwen2.5-1.5B → LLaMA-3.2-3B`** sur ARC-C ou OBQA, et
-comparer à :
+Reproduire au moins **Qwen2.5-1.5B $\rightarrow$ LLaMA-3.2-3B** sur ARC-C ou OBQA, et comparer à :
 
 - le **modèle cible nu** (sans adaptateur) ;
-- une **interpolation naïve** des poids LoRA (zéro-padding quand les dimensions
-  permettent).
+- une **interpolation naïve** des poids LoRA (zéro-padding quand les dimensions permettent).
 
-Cibles indicatives sur ARC-C : Cross-LoRA doit être strictement au-dessus du
-modèle nu et de l'interpolation naïve, sans atteindre un fine-tuning natif sur la
-cible — c'est cohérent avec le papier.
+Cibles indicatives sur ARC-C : Cross-LoRA doit être strictement au-dessus du modèle nu et de l'interpolation naïve, sans atteindre un fine-tuning natif sur la cible - c'est cohérent avec le papier.
 
-### 8.4 Ablations utiles
+### Ablations utiles
 
-- `r_svd ∈ {80, 160, 320}` — pour voir où la qualité plafonne ;
+- $\rsvd \in \{80, 160, 320\}$ - pour voir où la qualité plafonne ;
 - attention seule vs attention + MLP ;
 - avec / sans cache SVD (impact temps, pas qualité).
 
-> *Figure 4 (placeholder)* — **graphique à produire (matplotlib → PDF)** : score
-> ARC-C en fonction de `r_svd`, une courbe par couple source/cible. Permet de
-> vérifier visuellement le plateau autour de `r_svd = 320`.
+![ARC-C en fonction de r_svd](/posts/cross-lora/fig2_4_arc_vs_rsvd.webp)
 
-## 9. Coût et reproductibilité
+## Coût et reproductibilité
 
-### 9.1 Hardware testé dans le papier
+### Hardware testé dans le papier
 
 - V100 32 GB et RTX 4090 24 GB ;
 - CUDA 11.8, Ubuntu 22.04.1.
 
-### 9.2 Ordres de grandeur
+### Ordres de grandeur
 
 | Métrique         | V100         | RTX 4090     |
 |------------------|--------------|--------------|
 | Temps transfert  | ~349 s       | ~564 s       |
 | Pic mémoire      | 2.3–5.5 GB   | 2.3–5.5 GB   |
 
-### 9.3 Recette LoRA source (Table 4 du papier)
+### Recette LoRA source (Table 4 du papier)
 
 À reproduire si on entraîne le LoRA source de zéro :
 
-- `batch = 16`, optimiseur `AdamW` ;
-- `lr = 1e-5`, `weight_decay = 0.1`, `max_grad_norm = 1.0` ;
-- `lora_rank = 16`, `lora_alpha = 32`, `lora_dropout = 0.1`, `bias = None` ;
-- `steps = 600` (ARC-C / ARC-E / OBQA), `300` (HellaSwag).
+- `batch` $= 16$, optimiseur `AdamW` ;
+- `lr` $= 10^{-5}$, `weight_decay` $= 0.1$, `max_grad_norm` $= 1.0$ ;
+- $\rlora = 16$, $\alpha = 32$, `lora_dropout` $= 0.1$, `bias = None` ;
+- `steps` $= 600$ (ARC-C / ARC-E / OBQA), $300$ (HellaSwag).
 
-### 9.4 Config Cross-LoRA (Table 5)
+### Config Cross-LoRA (Table 5)
 
-- `r_svd = 320` ;
-- `lora_alpha = 64` côté cible ;
+- $\rsvd = 320$ ;
+- $\alpha = 64$ côté cible ;
 - modules cibles : `q_proj, k_proj, v_proj, o_proj, gate_proj, up_proj, down_proj`.
 
-> *Figure 5 (placeholder)* — **table comparative à produire (PDF)** : un récap
-> visuel des hyperparamètres LoRA source vs config Cross-LoRA, avec les
-> différences mises en évidence (notamment `alpha`).
+![Hyperparamètres LoRA source vs Cross-LoRA](/posts/cross-lora/fig2_5_hyperparams_table.webp)
 
-## 10. Pièges à éviter
+## Pièges à éviter
 
-- **Lire `r = 320` comme un rang LoRA** : c'est le rang de **sous-espace**, à ne
-  pas confondre avec `r_lora`.
-- **Implémenter l'équation globale** au lieu d'`Algorithm 1` : équivalent en
-  théorie, fragile dès qu'il y a un mismatch dimensionnel.
-- **Oublier de cacher les SVD** : on recalcule deux fois la même décomposition
-  pour `A` et `B` du même module.
+- **Lire $r = 320$ comme un rang LoRA** : c'est le rang de **sous-espace** ($\rsvd$), à ne pas confondre avec $\rlora$.
+- **Implémenter l'équation globale** au lieu d'`Algorithm 1` : équivalent en théorie, fragile dès qu'il y a un mismatch dimensionnel.
+- **Oublier de cacher les SVD** : on recalcule deux fois la même décomposition pour $A$ et $B$ du même module.
 - **Publier un adaptateur partiel** sans signaler le taux de couverture.
-- **Mélanger les conventions gauche/droite** entre `lora_A` et `lora_B` —
-  symptôme typique : shapes correctes mais qualité dégradée à zéro.
-- **SVD en `bfloat16`** : les petites valeurs singulières deviennent du bruit
-  pur. Toujours caster en `float32` avant.
-- **Comparer à un mauvais baseline** : le LoRA source ne tourne pas sur la
-  cible ; les seules baselines honnêtes sont *base nue* et *interpolation naïve*.
+- **Mélanger les conventions gauche/droite** entre `lora_A` et `lora_B` - symptôme typique : shapes correctes mais qualité dégradée à zéro.
+- **SVD en `bfloat16`** : les petites valeurs singulières deviennent du bruit pur. Toujours caster en `float32` avant.
+- **Comparer à un mauvais baseline** : le LoRA source ne tourne pas sur la cible ; les seules baselines honnêtes sont *base nue* et *interpolation naïve*.
 
-## 10 bis. Résultats indicatifs (fil rouge `Qwen2.5-1.5B → LLaMA-3.2-3B`)
+## Résultats indicatifs (fil rouge Qwen2.5-1.5B $\rightarrow$ LLaMA-3.2-3B)
 
-Ordres de grandeur à attendre une fois le pipeline en place. À titre indicatif,
-inspiré des chiffres du papier — vos résultats varieront selon `r_svd`, la
-recette LoRA source, et le dtype.
+Ordres de grandeur à attendre une fois le pipeline en place. À titre indicatif, inspiré des chiffres du papier - vos résultats varieront selon $\rsvd$, la recette LoRA source, et le dtype.
 
 | Configuration                          | ARC-C        | Commentaire                       |
 |----------------------------------------|--------------|-----------------------------------|
 | LLaMA-3.2-3B nu                        | référence    | borne basse                        |
-| LLaMA-3.2-3B + LoRA Qwen interpolé naïf | ≈ référence  | les dimensions ne coïncident pas, l'interpolation est essentiellement bruit |
-| LLaMA-3.2-3B + Cross-LoRA (`r_svd=320`) | au-dessus    | gain modeste mais reproductible    |
+| LLaMA-3.2-3B + LoRA Qwen interpolé naïf | $\approx$ référence  | les dimensions ne coïncident pas, l'interpolation est essentiellement bruit |
+| LLaMA-3.2-3B + Cross-LoRA ($\rsvd = 320$) | au-dessus    | gain modeste mais reproductible    |
 | LLaMA-3.2-3B + LoRA natif (réentraîné) | borne haute  | nécessite des données              |
 
-Cross-LoRA n'est pas magique : il *préserve une part* du gain du fine-tuning
-source. C'est suffisant quand les données ne sont plus accessibles et qu'on veut
-éviter une journée de calcul.
+Cross-LoRA n'est pas magique : il *préserve une part* du gain du fine-tuning source. C'est suffisant quand les données ne sont plus accessibles et qu'on veut éviter une journée de calcul.
 
-> *Figure 6 (placeholder)* — **barplot à produire (matplotlib → PDF)** : score
-> ARC-C des quatre configurations ci-dessus, avec écart-type sur 3 graines pour
-> Cross-LoRA. Mettre la borne haute (LoRA natif) en pointillés gris pour
-> souligner que ce n'est pas la cible de Cross-LoRA.
+![Résultats ARC-C par configuration](/posts/cross-lora/fig2_6_results_barplot.webp)
 
-## 10 ter. Checklist finale
+##  Checklist finale
 
 À cocher avant de publier un adaptateur transféré :
 
-- [ ] `r_lora` et `r_svd` séparés explicitement dans le code et dans la config.
+- [ ] $\rlora$ et $\rsvd$ séparés explicitement dans le code et dans la config.
 - [ ] SVD calculée en `float32`, cache activé.
-- [ ] Énergie SVD conservée > 0.9 sur les couches utilisées (sinon : augmenter
-      `r_svd` ou exclure la couche).
-- [ ] Résidus d'alignement loggés ; couches au-dessus de 0.95 en résidu relatif
-      signalées dans le rapport.
-- [ ] Couverture des modules ≥ 100 % attendu, ou écart documenté.
+- [ ] Énergie SVD conservée $> 0.9$ sur les couches utilisées (sinon : augmenter $\rsvd$ ou exclure la couche).
+- [ ] Résidus d'alignement loggés ; couches au-dessus de $0.95$ en résidu relatif signalées dans le rapport.
+- [ ] Couverture des modules $\geq 100\,\%$ attendu, ou écart documenté.
 - [ ] Biais source traités explicitement (cf. § 7.4).
 - [ ] Adaptateur rechargeable via `PeftModel.from_pretrained` sans warning.
-- [ ] Évaluation sur au moins un benchmark, comparée à *base nue* et
-      *interpolation naïve*.
-- [ ] Hyperparamètres (`r_svd`, `alpha`, `target_modules`, dtype) inscrits dans
-      `adapter_config.json` ou dans une note adjacente.
+- [ ] Évaluation sur au moins un benchmark, comparée à *base nue* et *interpolation naïve*.
+- [ ] Hyperparamètres ($\rsvd$, $\alpha$, `target_modules`, dtype) inscrits dans `adapter_config.json` ou dans une note adjacente.
 
-## 10 quater. Exemple d'appel end-to-end
+## Exemple d'appel end-to-end
 
-Une fois le pipeline implémenté, l'usage côté utilisateur tient en quelques
-lignes :
+Une fois le pipeline implémenté, l'usage côté utilisateur tient en quelques lignes :
 
 ```python
 from transformers import AutoModelForCausalLM
@@ -551,41 +493,26 @@ save_peft_adapter(
 )
 ```
 
-À partir de là, l'adaptateur `./llama-3b-arc-from-qwen/` est chargeable
-directement comme n'importe quel adaptateur PEFT — y compris dans des
-inférences `vLLM` ou `text-generation-inference`.
+À partir de là, l'adaptateur `./llama-3b-arc-from-qwen/` est chargeable directement comme n'importe quel adaptateur PEFT - y compris dans des inférences `vLLM` ou `text-generation-inference`.
 
-## 10 quinquies. Quand *ne pas* utiliser Cross-LoRA
+## Quand *ne pas* utiliser Cross-LoRA
 
 Cross-LoRA n'est pas la bonne réponse à toutes les situations :
 
-- **Vous avez encore les données** : ré-entraînez. C'est plus rapide, plus
-  fidèle, et ça évite l'intégralité du pipeline ci-dessus.
-- **Source et cible sont identiques** : un simple chargement PEFT suffit. Aucune
-  projection nécessaire.
-- **Cible d'architecture exotique** (SSM, Mamba, MoE non standard) : l'hypothèse
-  de sous-espaces partagés ne tient plus de la même manière. Mieux vaut
-  re-fine-tuner même sur peu de données.
-- **Adaptateur source DoRA / rsLoRA** sans avoir adapté le pipeline à leur
-  structure : vous obtiendrez un adaptateur qui se charge mais perd la
-  composante de magnitude / le facteur d'échelle correct.
-- **Vous cherchez la qualité maximale absolue** : la *borne haute* reste un
-  fine-tuning natif. Cross-LoRA vise la portabilité, pas la SOTA.
-## 11. Conclusion
+- **Vous avez encore les données** : ré-entraînez. C'est plus rapide, plus fidèle, et ça évite l'intégralité du pipeline ci-dessus.
+- **Source et cible sont identiques** : un simple chargement PEFT suffit. Aucune projection nécessaire.
+- **Cible d'architecture exotique** (SSM, Mamba, MoE non standard) : l'hypothèse de sous-espaces partagés ne tient plus de la même manière. Mieux vaut re-fine-tuner même sur peu de données.
+- **Adaptateur source DoRA / rsLoRA** sans avoir adapté le pipeline à leur structure : vous obtiendrez un adaptateur qui se charge mais perd la composante de magnitude / le facteur d'échelle correct.
+- **Vous cherchez la qualité maximale absolue** : la *borne haute* reste un fine-tuning natif. Cross-LoRA vise la portabilité, pas la SOTA.
 
-Ce que Cross-LoRA achète : la **portabilité de l'investissement de fine-tuning**,
-sans données ni ré-entraînement. Le coût d'un transfert se compte en minutes sur
-GPU grand public, pas en heures de calcul ni en jeux de données à reconstituer.
+## Conclusion
+
+Ce que Cross-LoRA achète : la **portabilité de l'investissement de fine-tuning**, sans données ni ré-entraînement. Le coût d'un transfert se compte en minutes sur GPU grand public, pas en heures de calcul ni en jeux de données à reconstituer.
 
 Ce qui reste ouvert :
 
-- **familles très éloignées** — l'hypothèse de sous-espaces partagés faiblit ;
-- **profondeurs très différentes** — le matching proportionnel est une heuristique,
-  pas une garantie ;
-- **modules non standards** (MoE, GQA agressifs, attention factorisée) — il faut
-  étendre la liste `TARGET_MODULES` au cas par cas et adapter les vérifications
-  de dimensions.
+- **familles très éloignées** - l'hypothèse de sous-espaces partagés faiblit ;
+- **profondeurs très différentes** - le matching proportionnel est une heuristique, pas une garantie ;
+- **modules non standards** (MoE, GQA agressifs, attention factorisée) - il faut étendre la liste `TARGET_MODULES` au cas par cas et adapter les vérifications de dimensions.
 
-Pour la suite : on peut imaginer combiner Cross-LoRA avec un *léger* ajustement
-post-transfert (quelques centaines de pas sur un petit corpus) pour récupérer le
-gain manquant — mais ce n'est plus *zero-data*, c'est un autre régime.
+Pour la suite : on peut imaginer combiner Cross-LoRA avec un *léger* ajustement post-transfert (quelques centaines de pas sur un petit corpus) pour récupérer le gain manquant - mais ce n'est plus *zero-data*, c'est un autre régime.

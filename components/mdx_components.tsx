@@ -60,13 +60,13 @@ const components = {
     );
   },
   ul: ({ className, ...props }: Props) => (
-    <ul className={cn("my-7 ml-6 list-disc marker:text-editorial-red text-neutral-700 [&>li+li]:mt-3", className)} {...props} />
+    <ul className={cn("my-5 ml-6 list-disc marker:text-editorial-red text-neutral-700 [&>li+li]:mt-1", className)} {...props} />
   ),
   ol: ({ className, ...props }: Props) => (
-    <ol className={cn("my-7 ml-6 list-decimal marker:font-sans marker:text-sm marker:font-semibold marker:text-editorial-red text-neutral-700 [&>li+li]:mt-3", className)} {...props} />
+    <ol className={cn("my-5 ml-6 list-decimal marker:font-sans marker:text-sm marker:font-semibold marker:text-editorial-red text-neutral-700 [&>li+li]:mt-1", className)} {...props} />
   ),
   li: ({ className, ...props }: Props) => (
-    <li className={cn("break-words pl-2 text-[1.06rem] leading-8", className)} {...props} />
+    <li className={cn("break-words pl-2 text-[1.06rem] leading-7", className)} {...props} />
   ),
   blockquote: ({ className, ...props }: Props) => (
     <blockquote className={cn("mdx-blockquote relative my-10 border-l-2 border-editorial-red pl-7 pr-2 font-serif text-[1.35rem] italic leading-[1.55] text-neutral-700", className)} {...props} />

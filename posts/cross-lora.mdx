@@ -29,7 +29,7 @@ Dans cet article, nous apprendrons:
   1. comment ça fonctionne: le contenu exact d'Algorithm 1 du papier
   2. Quels hypothèses à la méthode et comment les vérifier
 
-*Figure 1 (placeholder)* - **schéma TikZ à produire** : trois blocs alignés horizontalement représentant $(\text{modèle source } \Ws + \text{adaptateur source } \dW_s)$ $\rightarrow$ $(\text{transfert Cross-LoRA, sans données})$ $\rightarrow$ $(\text{modèle cible } \Wt + \text{adaptateur projeté } \dW_t)$. Mettre en évidence par des couleurs distinctes les espaces d'entrée et de sortie de chaque modèle, et le fait qu'aucune donnée ne traverse la flèche centrale.
+![Vue d'ensemble de Cross-LoRA](/posts/cross-lora/fig1_overview.webp)
 
 ## Table des notations
 
@@ -72,7 +72,7 @@ $$
 h = W x + \frac{\alpha}{\rlora} B(Ax)
 $$
  
- *Figure 2 (placeholder)* - **diagramme TikZ à produire** : flux du calcul $h = Wx + (\alpha/\rlora)BAx$ représenté comme deux branches parallèles, l'une avec la matrice pleine $W$ (figée, en gris), l'autre avec $A$ puis $B$ (apprises, en couleur), avec annotation des dimensions de chaque tenseur.
+![Flux d'une couche LoRA](/posts/cross-lora/fig2_lora_layer.webp)
 
 ### Trois conséquences utiles pour la suite
 
@@ -119,7 +119,7 @@ Voilà le raisonnement, en trois temps.
 
 Schéma directeur : **SVD $\rightarrow$ alignement $\rightarrow$ projection**.
 
-*Figure 3 (placeholder)* - **schéma TikZ à produire, central pour l'article** : trois colonnes côte à côte. - Colonne 1 : deux ellipses représentant les sous-espaces dominants de $\Ws$ et $\Wt$, désalignés. - Colonne 2 : la matrice d'alignement $\PU$ représentée par une rotation/cisaillement qui amène l'ellipse source sur la cible. - Colonne 3 : $\dW_s$ figuré comme une flèche dans l'espace source, et $\dW_t$ comme la même flèche après ré-expression dans l'espace cible.
+![SVD, alignement, projection](/posts/cross-lora/fig3_svd_align_project.webp)
 
 Le reste de l'article remplit les détails de chaque étape.
 
@@ -199,7 +199,7 @@ $\widetilde{U}_s$ est une base du sous-espace dominant **source**, mais **ré-ex
 dimensions du modèle cible**. C'est exactement le dictionnaire dont on avait
 besoin.
 
-*Figure 4 (placeholder)* - **diagramme PDF/TikZ à produire** : à gauche, la matrice $\Us$ (taille $m_s \times \rsvd$) ; au milieu, la matrice $\PU$ (taille $m_t \times m_s$) ; à droite, la matrice $\widetilde{U}_s$ (taille $m_t \times \rsvd$). Annoter le produit matriciel $\widetilde{U}_s = \PU \Us$ et insister visuellement sur le passage de $m_s$ à $m_t$ lignes.
+![Construction de la base alignée](/posts/cross-lora/fig4_pu_construction.webp)
 
 ## Brique 2 - LoRA-Shift
 
@@ -235,7 +235,7 @@ Lecture intuitive :
 On retrouve bien des facteurs $(\At, \Bt)$ aux dimensions du modèle cible et toujours de rang $\le \rlora$.
 
 
-*Figure 5 (placeholder)* - **schéma TikZ à produire** : deux pipelines parallèles, l'un pour $\Bs \to \Bt$ (côté gauche), l'autre pour $\As \to \At$ (côté droit), avec les opérateurs $\widetilde{U}_s^T$, $\widetilde{U}_s$, $\widetilde{V}_s$, $\widetilde{V}_s^T$ représentés comme des boîtes et les dimensions annotées sur chaque flèche.
+![Projections gauche et droite](/posts/cross-lora/fig5_left_right_projection.webp)
 
 ### Ce qu'on obtient
 
@@ -268,7 +268,7 @@ Vis-à-vis des alternatives :
 
 Cross-LoRA se positionne donc comme un compromis : **moins fidèle qu'un ré-entraînement, beaucoup plus solide qu'une copie naïve**, et utilisable quand on n'a plus accès aux données.
 
-*Figure 6 (placeholder)* - **graphique à produire (matplotlib + export PDF)** : axe X = degré de divergence architecturale (intra-famille $\rightarrow$ inter-famille $\rightarrow$ hétéro-architecture) ; axe Y = qualité du transfert (score sur ARC-C par exemple). Tracer trois courbes : *base model*, *interpolation naïve*, *Cross-LoRA*. Faire apparaître le « ciseau » qui s'ouvre quand on s'éloigne de l'intra-famille.
+![Qualité du transfert vs divergence architecturale](/posts/cross-lora/fig6_quality_vs_divergence.webp)
 
 ### Une hypothèse à l'épreuve des faits
 

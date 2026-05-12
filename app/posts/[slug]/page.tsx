@@ -54,9 +54,9 @@ export default async function Page({
     <div className="mx-auto w-full min-w-0 max-w-[1280px] px-4 sm:px-6 lg:grid lg:grid-cols-[minmax(0,1fr)_17rem] lg:gap-14">
       <article className="min-w-0 lg:max-w-[860px] lg:justify-self-end">
         <Button asChild variant="ghost" className="mb-8 font-sans text-xs uppercase tracking-[0.18em] text-muted-foreground">
-          <Link href="/#articles" className="no-underline hover:no-underline">
+          <Link href="/posts" className="no-underline hover:no-underline">
             <ArrowLeftIcon data-icon="inline-start" />
-            Back to Home
+            Back to all articles
           </Link>
         </Button>
 
@@ -95,8 +95,8 @@ export default async function Page({
         <div className="mt-16 pt-7">
           <Separator className="-mt-7 mb-7" />
           <Button asChild variant="link" className="px-0 font-sans text-xs uppercase tracking-[0.18em] text-muted-foreground">
-            <Link href="/#articles">
-              Read more from home page
+            <Link href="/posts">
+              Back to all articles
               <ArrowRightIcon data-icon="inline-end" />
             </Link>
           </Button>
