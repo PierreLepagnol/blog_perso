@@ -8,7 +8,8 @@
     "build": "bun --bun next build --turbopack && bun --bun next-image-export-optimizer",
     "start": "bun --bun next start",
     "lint": "bun --bun eslint .",
-    "images:webp": "bun scripts/convert-images-to-webp.ts"
+    "images:webp": "bun scripts/convert-images-to-webp.ts",
+    "latex:render": "bash scripts/render-latex-standalones.sh"
   },
   "dependencies": {
     "@jsdevtools/rehype-toc": "^3.0.2",

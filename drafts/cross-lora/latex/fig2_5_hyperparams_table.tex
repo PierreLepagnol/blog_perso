@@ -1,0 +1,31 @@
+\documentclass[tikz,border=8pt]{standalone}
+\usepackage[T1]{fontenc}\usepackage{lmodern}\usepackage{booktabs,tabularx,array,xcolor,colortbl}
+\begin{document}\sffamily
+\begin{tabularx}{15cm}{>{\raggedright\arraybackslash}p{3.4cm}>{\raggedright\arraybackslash}X>{\raggedright\arraybackslash}X}
+\multicolumn{3}{c}{\Large\bfseries LoRA source vs configuration Cross-LoRA}\\[5pt]
+\toprule
+\textbf{Hyperparamètre} & \textbf{LoRA source} & \textbf{Cross-LoRA cible}\\
+\midrule
+\rowcolor{blue!7}\multicolumn{3}{l}{\textbf{Optimisation (source uniquement, cible gelée)}}\\
+Optimiseur & AdamW & —\\
+Learning rate & $10^{-5}$ & —\\
+Weight decay & 0.1 & —\\
+Max grad norm & 1.0 & —\\
+Batch size & 16 & —\\
+Steps & 600 (ARC/OBQA), 300 (HS) & —\\
+\rowcolor{blue!7}\multicolumn{3}{l}{\textbf{Adaptateur LoRA (forme préservée)}}\\
+Rang $r_{\mathrm{LoRA}}$ & 16 & 16 (préservé)\\
+Échelle $\alpha$ & 32 & 64 ($\times2$, compense la projection)\\
+Dropout & 0.1 & — (pas d'entraînement)\\
+Bias & none & none\\
+\rowcolor{blue!7}\multicolumn{3}{l}{\textbf{Spécifique Cross-LoRA (transfert)}}\\
+Rang $r_{\mathrm{SVD}}$ & — & 320 (cf. Fig. 2.4)\\
+Modules cibles & q, k, v, o, gate, up, down & q, k, v, o, gate, up, down\\
+Solveur d'alignement & — & \texttt{torch.linalg.lstsq}\\
+Dtype SVD/alignement & — & fp32 (stabilité numérique)\\
+Dtype d'entraînement & bf16 & —\\
+Temps mural & $\sim$1 h sur 1×A100 & $\sim$3 min sur 1×A100\\
+Données utilisées & jeu d'entraînement complet & aucune\\
+\bottomrule
+\end{tabularx}
+\end{document}
