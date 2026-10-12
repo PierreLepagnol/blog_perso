@@ -2,11 +2,12 @@
   "name": "blog_perso",
   "version": "0.1.0",
   "private": true,
+  "packageManager": "bun@1.4.2",
   "scripts": {
-    "dev": "next dev",
-    "build": "next build --turbopack && next-image-export-optimizer",
-    "start": "next start",
-    "lint": "eslint .",
+    "dev": "bun --bun next dev",
+    "build": "bun --bun next build --turbopack && bun --bun next-image-export-optimizer",
+    "start": "bun --bun next start",
+    "lint": "bun --bun eslint .",
     "images:webp": "bun scripts/convert-images-to-webp.ts"
   },
   "dependencies": {

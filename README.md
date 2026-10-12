@@ -1,36 +1,48 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# Personal blog
 
-## Getting Started
+A Next.js blog using Bun for dependency management and script execution. The site is exported as static files and deployed to GitHub Pages.
 
-First, run the development server:
+## Getting started
+
+Install [Bun](https://bun.sh/docs/installation) 1.4.2, the version pinned in `package.json`, then install dependencies:
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+bun install --frozen-lockfile
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Create `.env.local` with the public site URL:
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```dotenv
+NEXT_PUBLIC_APP_URL=http://localhost:3000
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-optimization) to automatically optimize and load Inter, a custom Google Font.
+Start the development server:
 
-## Learn More
+```bash
+bun run dev
+```
 
-To learn more about Next.js, take a look at the following resources:
+Open [http://localhost:3000](http://localhost:3000). Edit `app/page.tsx` or the articles in `posts/` to update the site.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Checks and production build
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
+```bash
+bun run lint
+bun run build
+```
 
-## Deploy on Vercel
+The build exports the site to `out/` and optimizes its images. Set `NEXT_PUBLIC_APP_URL` to the deployed site's URL when building for production. Because this project uses static export, serve `out/` with a static web server; `next start` does not support this output mode.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+To convert source images to WebP:
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+```bash
+bun run images:webp
+```
+
+## Dependencies and deployment
+
+Use `bun add <package>` or `bun add --dev <package>` to add dependencies. Include changes to both `package.json` and `bun.lock` in commits.
+
+The GitHub Pages workflow uses the Bun version from `package.json`, installs with `bun install --frozen-lockfile`, and deploys `out/`. Configure the `NEXT_PUBLIC_APP_URL` repository secret with the deployed site's URL.
+
+The scripts explicitly select Bun's runtime, following [Bun's Next.js guide](https://bun.sh/guides/ecosystem/nextjs).
