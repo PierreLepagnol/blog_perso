@@ -5,12 +5,10 @@ excerpt: Transférer un adaptateur LoRA d'un modèle à un autre, sans données 
 tags: [AI, LLM, LoRA, Transfert, zero-data]
 ---
 
-Les modèles de base évoluent vite. Lorsque vous avez investi du temps et des données
-pour entraîner un LoRA sur un modèle, vous voulez idéalement pouvoir le réutiliser
-sur un autre modèle, sans avoir à ré-ajuster le LoRA lui-même.
+Les modèles de base évoluent vite.
+Lorsque vous avez investi du temps et des données pour entraîner un LoRA sur un modèle, vous voulez idéalement pouvoir le réutiliser sur un autre modèle, sans avoir à ré-ajuster le LoRA lui-même.
 
-C'est tout l'objet du papier ***Cross-LoRA: A Data-Free LoRA Transfer Framework
-across Heterogeneous LLMs***.
+C'est tout l'objet du papier ***Cross-LoRA: A Data-Free LoRA Transfer Framework across Heterogeneous LLMs***.
 
 **TL;DR** - Cross-LoRA prend un adaptateur LoRA $(\As, \Bs)$ entraîné sur un modèle source, fait une SVD tronquée des poids des deux modèles, aligne les bases par moindres carrés, puis projette $\As$ et $\Bs$ côté droit et côté gauche pour obtenir un adaptateur $(\At, \Bt)$ directement attachable au modèle cible. 
 Aucune donnée et aucun gradient n'est requis, seulement quelques minutes GPU par couple de modèles.
